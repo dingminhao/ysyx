@@ -1,41 +1,29 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
+#include <nvboard.h>
+#include <Vtop.h>
 
-#include "Vlight.h"
-#include "verilated.h"
-#include "verilated_vcd_c.h"
+static TOP_NAME dut;
 
-#define MAX_TIME 50000000
-vluint64_t sim_time = 0;
+void nvboard_bind_all_pins(Vtop* top);
 
-void dut_reset (Vlight *dut, vluint64_t &sim_time){
-    dut->rst = 0;
-    if(sim_time >= 1 && sim_time < 10){
-        dut->rst = 1;
-    }
+static void single_cycle() {
+  dut.clk = 0; dut.eval();
+  dut.clk = 1; dut.eval();
 }
 
+static void reset(int n) {
+  dut.rst = 1;
+  while (n -- > 0) single_cycle();
+  dut.rst = 0;
+}
 
-int main(int argc, char* argv[]) {
-	Verilated::commandArgs(argc, argv);
-	Vlight *dut = new Vlight;
-	// 生成vcd文件
-	Verilated::traceEverOn(true);
-	VerilatedVcdC *m_trace = new VerilatedVcdC;
-	dut->trace(m_trace, 0);
-	m_trace->open("waveform.vcd");
-	
-	while(sim_time < MAX_TIME)
-	{
-		dut_reset(dut, sim_time);
-		dut->clk ^= 1;
-		dut->eval();
-		m_trace->dump(sim_time);
-		sim_time = sim_time + 1;
-	}
-	m_trace->close();
-	delete dut;
-	
-	return 0;
+int main() {
+  nvboard_bind_all_pins(&dut);
+  nvboard_init();
+
+  reset(10);
+
+  while(1) {
+    nvboard_update();
+    single_cycle();
+  }
 }
