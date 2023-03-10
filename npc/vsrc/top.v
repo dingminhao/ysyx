@@ -1,16 +1,17 @@
-module top (input clk,input rst, input [8:0]sw, output [3:0]ledr, output [7:0]seg0);
-	always@(clk or rst or sw[8:0])
-	if(sw[8])  begin
-			if(sw[7]) begin ledr[2:0] = 3'b111; seg0[7:0] = 8'b000000010;  end
-			else if(sw[6]) begin ledr[2:0] = 3'b110;  seg0[7:0] = 8'b10011111; end	 
-			else if(sw[5]) begin ledr[2:0] = 3'b101;  seg0[7:0] = 8'b00100101; end	 
-			else if(sw[4]) begin ledr[2:0] = 3'b100;  seg0[7:0] = 8'b00001101; end	 
-			else if(sw[3]) begin ledr[2:0] = 3'b011;  seg0[7:0] = 8'b10011001; end	 
-			else if(sw[2]) begin ledr[2:0] = 3'b010;  seg0[7:0] = 8'b01001001; end	 
-			else if(sw[1]) begin ledr[2:0] = 3'b001;  seg0[7:0] = 8'b01000001; end	 
-			else if(sw[0]) begin ledr[2:0] = 3'b000;  seg0[7:0] = 8'b00011111; end
-			else begin ledr[3] = 0; 	seg0[7:0] = 8'b11111111; end end
-	else 
-		begin ledr[2:0] = 3'b111; seg0[7:0] = 8'b000000010;  end
+module top (input clk,input rst, input [10:0]sw, output [4:0]ledr);
+	always@(clk or rst or sw)
+		begin
+			case(sw[10:8])
+			3'b000: begin ledr[3:0] = sw[3:0] + sw[7:4]; ledr[4] = sw[3]&sw[7]&~ledr[3] | ~sw[3]&~sw[7]&ledr[3]; end
+			3'b001: begin ledr[3:0] = sw[3:0] - sw[7:4]; ledr[4] = 0; end
+			3'b010: begin ledr[3:0] = ~sw[3:0]; ledr[4] = 0; end 
+			3'b011: begin ledr[3:0] = sw[3:0] & sw[7:4]; ledr[4] = 0; end
+			3'b100: begin ledr[3:0] = sw[3:0] | sw[7:4]; ledr[4] = 0; end
+			3'b101: begin ledr[3:0] = sw[3:0] ^ sw[7:4]; ledr[4] = 0; end
+			3'b110: begin if(sw[3:0] == sw[7:4]) ledr[4:0] = 5'b11111; else ledr[4:0] = 5'b00000; end
+			3'b111: begin if(sw[3:0] > sw[7:4]) ledr[4:0] = 5'b11111; else ledr[4:0] = 5'b00000; end
+			default: ledr[4:0] = 5'b11111;
+			endcase	
+		end
 endmodule
 
