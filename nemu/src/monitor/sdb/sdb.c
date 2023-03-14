@@ -14,6 +14,7 @@
 ***************************************************************************************/
 
 #include <isa.h>
+#include <memory/paddr.h>
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -36,7 +37,7 @@ static char* rl_gets() {
   line_read = readline("(nemu) ");
 
   if (line_read && *line_read) {
-    add_history(line_read);
+    add_history(line_read);        //將命令督導歷史記錄中
   }
 
   return line_read;
@@ -54,34 +55,73 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 
+// 添加指令 step info
+
+static int step(char *args);
+// 打印info
+static int info(char *args);
+// 掃描內存
+static int scan(char *args);
+
+
 static struct {
   const char *name;
   const char *description;
-  int (*handler) (char *);
-} cmd_table [] = {
+  int (*handler) (char *);   //創建函數指針 返回值爲int 輸入爲char*
+} cmd_table [] = {  //命令
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-
+  { "si", "Step [nums]", step},
+  { "info", "Reg Display", info},
+  { "x", "Scan Memory", scan} 
   /* TODO: Add more commands */
 
 };
 
-#define NR_CMD ARRLEN(cmd_table)
+static int step(char *args) {
+	char *arg = strtok(NULL, " ");	
+	if(args == NULL) cpu_exec(1); 
+	else if(atoi(arg) > 0 && atoi(arg) < 100)cpu_exec(atoi(arg));   //显示用BUG?
+  else printf("Unknow command '%s'", arg);
+  return 0;
+}
+
+static int info(char *args) {
+  char *arg = strtok(NULL, " "); 
+  if(strcmp(arg, "r") == 0) isa_reg_display();
+  else printf("Unknown command '%s'", arg);
+  return 0;
+}
+
+static int scan(char *args) {
+	char *arg = strtok(NULL, " ");
+	uint32_t number = atoi(arg); // 掃描的個數
+	arg = strtok(NULL, " ");
+	uint32_t init_address = (unsigned int)strtoul(arg, NULL, 16);
+	int i;
+	for(i = 0; i < number; i++){
+	printf("%lx ",(paddr_read(init_address, sizeof(uint32_t))));
+	init_address += sizeof(uint32_t);
+	}
+	return 0;
+}
+
+#define NR_CMD ARRLEN(cmd_table)   // 命令的總長度
 
 static int cmd_help(char *args) {
   /* extract the first argument */
-  char *arg = strtok(NULL, " ");
+  char *arg = strtok(NULL, " ");     //將arg分割
   int i;
-
+  printf("%s", arg);
   if (arg == NULL) {
     /* no argument given */
-    for (i = 0; i < NR_CMD; i ++) {
+    for (i = 0; i < NR_CMD; i ++) { // 打印所有存在的命令
       printf("%s - %s\n", cmd_table[i].name, cmd_table[i].description);
     }
   }
   else {
-    for (i = 0; i < NR_CMD; i ++) {
+    for (i = 0; i < NR_CMD; i ++) { // 打印目標命令
       if (strcmp(arg, cmd_table[i].name) == 0) {
         printf("%s - %s\n", cmd_table[i].name, cmd_table[i].description);
         return 0;
@@ -92,7 +132,7 @@ static int cmd_help(char *args) {
   return 0;
 }
 
-void sdb_set_batch_mode() {
+void sdb_set_batch_mode() { 
   is_batch_mode = true;
 }
 
@@ -102,30 +142,29 @@ void sdb_mainloop() {
     return;
   }
 
-  for (char *str; (str = rl_gets()) != NULL; ) {
-    char *str_end = str + strlen(str);
+  for (char *str; (str = rl_gets()) != NULL; ) {//讀取命令
+    char *str_end = str + strlen(str);// 尾指針
 
     /* extract the first token as the command */
-    char *cmd = strtok(str, " ");
+    char *cmd = strtok(str, " "); // 例如help
     if (cmd == NULL) { continue; }
 
     /* treat the remaining string as the arguments,
      * which may need further parsing
      */
-    char *args = cmd + strlen(cmd) + 1;
+    char *args = cmd + strlen(cmd) + 1;// 得到命令空格後的指令 例如： help a 輸出 a
     if (args >= str_end) {
       args = NULL;
     }
-
 #ifdef CONFIG_DEVICE
     extern void sdl_clear_event_queue();
     sdl_clear_event_queue();
 #endif
 
     int i;
-    for (i = 0; i < NR_CMD; i ++) {
+    for (i = 0; i < NR_CMD; i ++) {// 找到與輸入匹配的命令
       if (strcmp(cmd, cmd_table[i].name) == 0) {
-        if (cmd_table[i].handler(args) < 0) { return; }
+        if (cmd_table[i].handler(args) < 0) { return; }// 當爲q命令是退出
         break;
       }
     }
