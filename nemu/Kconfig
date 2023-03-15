@@ -2,7 +2,7 @@ mainmenu "NEMU Configuration Menu"
 
 choice
   prompt "Base ISA"
-  default ISA_riscv32
+  default ISA_riscv64
 config ISA_x86
   bool "x86"
 config ISA_mips32

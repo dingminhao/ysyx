@@ -19,14 +19,14 @@
 #include <common.h>
 
 typedef struct {
-  word_t gpr[32];
-  vaddr_t pc;
+  word_t gpr[32];  // 32个寄存器 的值
+  vaddr_t pc;      // 内存指令地址
 } riscv64_CPU_state;
 
 // decode
 typedef struct {
   union {
-    uint32_t val;
+    uint32_t val;  // 译码
   } inst;
 } riscv64_ISADecodeInfo;
 

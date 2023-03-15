@@ -62,7 +62,8 @@ static int step(char *args);
 static int info(char *args);
 // 掃描內存
 static int scan(char *args);
-
+// 表达式计算
+static int Calcu(char *args);
 
 static struct {
   const char *name;
@@ -74,10 +75,25 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
   { "si", "Step [nums]", step},
   { "info", "Reg Display", info},
-  { "x", "Scan Memory", scan} 
+  { "x", "Scan Memory", scan},
+  { "p", "Calculate EXPR", Calcu}
   /* TODO: Add more commands */
 
 };
+
+static int Calcu(char *args) {
+  char * arg = args;
+  bool success = true; //判断是否匹配成功
+  if(arg == NULL){ 
+    printf("arg Input Error");
+    return 0;
+  }
+  int Cal_val = expr(arg, &success);
+  printf("%s=%d \n", arg, Cal_val);
+
+  if(!success) printf("Match Error");
+  return 0;
+}
 
 static int step(char *args) {
 	char *arg = strtok(NULL, " ");	
@@ -96,13 +112,25 @@ static int info(char *args) {
 
 static int scan(char *args) {
 	char *arg = strtok(NULL, " ");
+	if(arg == NULL) {
+    printf("Parameter is few, Please print again!");
+    return 0;
+  }
 	uint32_t number = atoi(arg); // 掃描的個數
 	arg = strtok(NULL, " ");
-	uint32_t init_address = (unsigned int)strtoul(arg, NULL, 16);
-	int i;
-	for(i = 0; i < number; i++){
-	printf("%lx ",(paddr_read(init_address, sizeof(uint32_t))));
-	init_address += sizeof(uint32_t);
+	if(arg == NULL) {
+    printf("Parameter is few, Please print again!");
+    return 0;
+  }
+  paddr_t init_address = strtoul(arg, NULL, 16); //将字符串转化为16进制的数
+	for(int i = 0; i < number; i++){
+    uint32_t data = paddr_read(init_address + i * sizeof(uint32_t), sizeof(uint32_t));
+	  printf("0x%08x\t", init_address + i * 4);                  
+      for(int j = 0; j < 4; j++) {
+        printf("0x%02x ", data & 0xff);
+        data = data >> 8;
+    }
+    printf("\n");
 	}
 	return 0;
 }

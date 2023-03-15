@@ -21,8 +21,10 @@
 #include <string.h>
 
 // this should be enough
+#define Buf_size 65535
 static char buf[65536] = {};
-static char code_buf[65536 + 128] = {}; // a little larger than `buf`
+static char code_buf[65536 + 128] = {}; // a little larger than `buf
+static int buf_end_pos = 0;
 static char *code_format =
 "#include <stdio.h>\n"
 "int main() { "
@@ -31,40 +33,93 @@ static char *code_format =
 "  return 0; "
 "}";
 
+void gen(char c) {
+  if (buf_end_pos <  Buf_size - 1) {
+    buf[buf_end_pos] = c;
+    ++buf_end_pos;
+    buf[buf_end_pos] = '\0';
+  } else {
+    printf("gen Error");
+  }
+}
+
+
+uint32_t choose(int range) {
+  assert(range > 1);
+  return rand()%(++range);
+}
+
+void gen_num() {
+  if(rand() % 2) gen(' ');
+  uint32_t random_number = rand()%1000;
+  char num_char[32];
+  int i = 0;
+  if(random_number == 0) {
+    if(buf[buf_end_pos - 1] == '/') gen('1');
+    else gen('0');
+  } else {
+    while (random_number) {
+      num_char[i++] = random_number%10 + 48;  // 为了变成符号类型
+      random_number /= 10;
+    }
+  }
+  if(i < 32) {
+    num_char[i] = '\0';
+  }
+  i--;
+
+  while(i >= 0) {
+  gen(num_char[i]);
+  i--;
+  }
+}
+
+void gen_rand_op() {
+  if(rand() % 2) gen(' ');
+  switch (choose(3)) {
+      case 0: gen('+'); break;
+      case 1: gen('-'); break;
+      case 2: gen('*'); break;
+      case 3: gen('/'); break;
+    }
+}
+
 static void gen_rand_expr() {
-
-
-  buf[0] = '\0';
+  switch (choose(2)) {
+    case 0: gen_num(); break;
+    case 1: gen('('); gen_rand_expr(); gen(')'); break;
+    default: gen_rand_expr(); gen_rand_op(); gen_rand_expr(); break;
+  }
 }
 
 int main(int argc, char *argv[]) {
-  int seed = time(0);
+  int seed = time(0); //生成随机种子
   srand(seed);
-  int loop = 1;
-  if (argc > 1) {
+  int loop = 1;  // 生成表达式数量
+  if (argc > 1) { // 输入形式
     sscanf(argv[1], "%d", &loop);
   }
   int i;
   for (i = 0; i < loop; i ++) {
+    buf_end_pos = 0;
     gen_rand_expr();
+    sprintf(code_buf, code_format, buf); //
 
-    sprintf(code_buf, code_format, buf);
-
-    FILE *fp = fopen("/tmp/.code.c", "w");
+    FILE *fp = fopen("/tmp/.code.c", "w"); //写文件
     assert(fp != NULL);
-    fputs(code_buf, fp);
+    fputs(code_buf, fp); // 文件写入
     fclose(fp);
 
-    int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
+    int ret = system("gcc /tmp/.code.c -o /tmp/.expr"); // 生成结果
     if (ret != 0) continue;
 
     fp = popen("/tmp/.expr", "r");
     assert(fp != NULL);
 
     int result;
-    fscanf(fp, "%d", &result);
+    int a = fscanf(fp, "%d", &result);
     pclose(fp);
-
+    if(a == 0) assert(0);
     printf("%u %s\n", result, buf);
   }
   return 0;
