@@ -32,6 +32,8 @@ static char *code_format =
 "}";
 
 static void gen_rand_expr() {
+
+
   buf[0] = '\0';
 }
 
