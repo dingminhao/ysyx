@@ -19,6 +19,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
+#include <watchpoint.h>
 
 static int is_batch_mode = false;
 
@@ -64,6 +65,10 @@ static int info(char *args);
 static int scan(char *args);
 // 表达式计算
 static int Calcu(char *args);
+// 监视点
+static int wt(char *args);
+// 删除监视点
+static int dwt(char *args);
 
 static struct {
   const char *name;
@@ -76,20 +81,42 @@ static struct {
   { "si", "Step [nums]", step},
   { "info", "Reg Display", info},
   { "x", "Scan Memory", scan},
-  { "p", "Calculate EXPR", Calcu}
-  /* TODO: Add more commands */
-
+  { "p", "Calculate EXPR", Calcu},
+  { "watch", "Watch point", wt},
+  { "d", "Delete watchpoint", dwt}
 };
 
+static int dwt(char *args) {
+  if(args == NULL) {
+    printf("Please input parameter!\n");
+    return 0;
+  }
+  int NO = atoi(args);
+  delete_wp(NO);
+  return 0;
+}
+
+static int wt(char *args) {
+  if(args == NULL) {
+    printf("Please add parameter!");
+  }
+  WP *p = new_wp();
+  bool suc = true;
+  uint64_t val = expr(args, &suc);
+  printf("The Value is %ld\n", val);
+  p -> value = val;
+  strcpy(p->EXPR, args); //将表达式保存
+  return 0;
+}
 static int Calcu(char *args) {
-  char * arg = args;
+  char *arg = args;
   bool success = true; //判断是否匹配成功
   if(arg == NULL){ 
     printf("arg Input Error");
     return 0;
   }
-  int Cal_val = expr(arg, &success);
-  printf("%s=%d \n", arg, Cal_val);
+  uint64_t Cal_val = expr(arg, &success);
+  printf("%s=%ld \n", arg, Cal_val);
 
   if(!success) printf("Match Error");
   return 0;
@@ -98,15 +125,18 @@ static int Calcu(char *args) {
 static int step(char *args) {
 	char *arg = strtok(NULL, " ");	
 	if(args == NULL) cpu_exec(1); 
-	else if(atoi(arg) > 0 && atoi(arg) < 100)cpu_exec(atoi(arg));   //显示用BUG?
-  else printf("Unknow command '%s'", arg);
+	else if(atoi(arg) > 0 && atoi(arg) < 100) cpu_exec(atoi(arg));   //显示用BUG?
+  else printf("Unknow command '%s'\n", arg);
   return 0;
 }
 
 static int info(char *args) {
   char *arg = strtok(NULL, " "); 
   if(strcmp(arg, "r") == 0) isa_reg_display();
-  else printf("Unknown command '%s'", arg);
+  else if(strcmp(arg, "wt") == 0) {
+    watch_points(); 
+  }
+  else printf("Unknown command '%s'\n", arg);
   return 0;
 }
 
@@ -116,7 +146,7 @@ static int scan(char *args) {
     printf("Parameter is few, Please print again!");
     return 0;
   }
-	uint32_t number = atoi(arg); // 掃描的個數
+	uint64_t number = atoi(arg); // 掃描的個數
 	arg = strtok(NULL, " ");
 	if(arg == NULL) {
     printf("Parameter is few, Please print again!");

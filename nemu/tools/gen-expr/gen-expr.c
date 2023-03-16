@@ -51,7 +51,7 @@ uint32_t choose(int range) {
 
 void gen_num() {
   if(rand() % 2) gen(' ');
-  uint32_t random_number = rand()%1000;
+  uint32_t random_number = rand()%10;
   char num_char[32];
   int i = 0;
   if(random_number == 0) {

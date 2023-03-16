@@ -24,13 +24,17 @@ const char *regs[] = {
 };
 
 void isa_reg_display() {
-	int i;
-	for(i = 0; i < sizeof(regs) / sizeof(regs[0]); i++) {
-		printf("%d\t%s\t%ld\n", i, regs[i], gpr(i));
+	for(word_t i = 0; i < sizeof(regs) / sizeof(regs[0]); i++) {
+		printf("%ld\t%s\t%016lx\n", i, regs[i], gpr(i));
 	}
 	printf("\n");
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
-  return 0;
+  word_t flag = 100;
+  for(word_t i = 0; i < sizeof(regs) / sizeof(regs[0]); i++) {
+    if(strcmp(s, regs[i]) == 0) flag = i;
+  }
+  if(flag != 100) *success = true;
+  return gpr(flag);
 }
