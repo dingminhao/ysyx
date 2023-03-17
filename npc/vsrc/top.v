@@ -1,25 +1,25 @@
-module top (input clk,input rst, input br, input [1:0]sw, output [4:0]ledr);
-	parameter S0 = 4'b0000;
-	parameter S1 = 4'b0001;
-	parameter S2 = 4'b0010;
-	parameter S3 = 4'b0011;
-	parameter S4 = 4'b0100;
-	parameter S5 = 4'b0101;
-	parameter S6 = 4'b0110;
-	parameter S7 = 4'b0111;
-	parameter S8 = 4'b1000;
+module top (input clk, input rst,input set1, input set2, output [4:0]ledr);
+	parameter s0 = 4'b0000;
+	parameter s1 = 4'b0001;
+	parameter s2 = 4'b0010;
+	parameter s3 = 4'b0011;
+	parameter s4 = 4'b0100;
+	parameter s5 = 4'b0101;
+	parameter s6 = 4'b0110;
+	parameter s7 = 4'b0111;
+	parameter s8 = 4'b1000;
 
 	reg[3:0]  st_next;
 	reg[3:0]  st_cur;
 	reg in;
-
+	reg[4:0] out;
 	// in_input
-	alway@(posedge butc or  posedge butr)
-		if(butc) in = 1'b1;
-		 
+	always @ (posedge set1)
+		in <= set2;
+		
 
 	// state transfer
-	always@(posedge clk or negedge rst) begin
+	always @ (posedge set1 or negedge rst) begin
 		if(!rst) begin
 			st_cur <= 4'b0000;
 		end
@@ -29,75 +29,72 @@ module top (input clk,input rst, input br, input [1:0]sw, output [4:0]ledr);
 	end
 
 	// state switch
-	always @() begin
+	always@(posedge set1)
 		case(st_cur)
-			A:
+			s0:
 				case(in)
-					1'b1 : st_next = S5;
-					0'b1 : st_next = S1;
-					default : st_next = IDLE;
+					1'b1 : st_next = s5;
+					0'b1 : st_next = s1;
+					default : st_next = s0;
 				endcase
-			B:
+			s1:
 				case(in)
-					1'b1 : st_next = S5;
-					0'b1 : st_next = S2;
-					default : st_next = IDLE;
+					1'b1 : st_next = s5;
+					0'b1 : st_next = s2;
+					default : st_next = s1;
 				endcase
-			C:
+			s2:
 				case(in)
-					1'b1 : st_next = S5;
-					0'b1 : st_next = S3;
-					default : st_next = IDLE;
+					1'b1 : st_next = s5;
+					0'b1 : st_next = s3;
+					default : st_next = s2;
 				endcase
-		   D:	
+		   s3:	
 				case(in)
-					1'b1 : st_next = S5;
-					0'b1 : st_next = S4;
-					default : st_next = IDLE;
+					1'b1 : st_next = s5;
+					0'b1 : st_next = s4;
+					default : st_next = s3;
 				endcase
-			E:
+			s4:
 				case(in)
-					1'b1 : st_next = S5;
-					0'b1 : st_next = S4;
-					default : st_next = IDLE;
+					1'b1 : st_next = s5;
+					0'b1 : st_next = s4;
+					default : st_next = s4;
 				endcase
-			F:
+			s5:
 				case(in)
-					1'b1 : st_next = S6;
-					0'b1 : st_next = S1;
-					default : st_next = IDLE;
+					1'b1 : st_next = s6;
+					0'b1 : st_next = s1;
+					default : st_next = s5;
 				endcase
-			G:
+			s6:
 				case(in)
-					1'b1 : st_next = S7;
-					0'b1 : st_next = S1;
-					default : st_next = IDLE;
+					1'b1 : st_next = s7;
+					0'b1 : st_next = s1;
+					default : st_next = s6;
 				endcase
-			H:
+			s7:
 				case(in)
-					1'b1 : st_next = S8;
-					0'b1 : st_next = S1;
-					default : st_next = IDLE;
+					1'b1 : st_next = s8;
+					0'b1 : st_next = s1;
+					default : st_next = s7;
 				endcase
-			I:
+			s8:
 				case(in)
-					1'b1 : st_next = S8;
-					0'b1 : st_next = S1;
-					default : st_next = IDLE;
+					1'b1 : st_next = s8;
+					0'b1 : st_next = s1;
+					default : st_next = s8;
 				endcase
+			default : st_next = st_cur;
 		endcase
 	
-	always @(posedge clk)
-	begin
-		if(!rst) begin
-			out <= 1'b0;
-		end
-		else begin
-		case(st_next)
-		  S8 : out <= 1'b1;
-		  S4 : out <= 1'b1;
-		  defalut : out <= 1'b0;
-	   endcase
+	always @ (posedge set1)
+			case(st_next)
+		 	 s8 : begin out[4] <= 1'b1;out[3:0] <= st_next; end
+		 	 s4 : begin out[4] <= 1'b1;out[3:0] <= st_next; end
+		 	 default : begin out[4] <= 1'b0;out[3:0] <= st_cur; end
+	   	endcase
+	assign ledr[4:0] = out[4:0];
 endmodule
 
 
