@@ -140,19 +140,21 @@ static int info(char *args) {
   return 0;
 }
 
-static int scan(char *args) {
+static int scan(char *args) { 
 	char *arg = strtok(NULL, " ");
 	if(arg == NULL) {
     printf("Parameter is few, Please print again!");
     return 0;
   }
 	uint64_t number = atoi(arg); // 掃描的個數
-	arg = strtok(NULL, " ");
+	arg = args + strlen(arg) + 1;   //实现expr可以加空格
 	if(arg == NULL) {
     printf("Parameter is few, Please print again!");
     return 0;
   }
-  paddr_t init_address = strtoul(arg, NULL, 16); //将字符串转化为16进制的数
+  bool suc = true; // 判断表达式是否成功
+  paddr_t init_address = expr(arg, &suc); //将字符串转化为16进制的数
+  if(suc == false) {printf("scan expr is error!"); return 0;}
 	for(int i = 0; i < number; i++){
     uint32_t data = paddr_read(init_address + i * sizeof(uint32_t), sizeof(uint32_t));
 	  printf("0x%08x\t", init_address + i * 4);                  

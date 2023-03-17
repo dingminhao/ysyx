@@ -46,7 +46,7 @@ WP* new_wp() {
 
 void free_up(WP *wp) {
   //现在head上面找是否存在这样一个节点
-  Assert(wp != NULL, "This is not a wp!\n");
+  Assert(wp != NULL && head != NULL, "This is not a wp!\n");
   WP *f = (WP *)malloc(sizeof(WP));
   WP *a = f;
   f -> next = head; 
@@ -57,8 +57,8 @@ void free_up(WP *wp) {
     }
     f = f -> next;
   }
-  // 将使用de节点扣下来
-  f -> next = wp -> next;
+  if(f -> next == head) head = head -> next;
+  else  f -> next -> next = wp -> next;
   // 将节点放在free上面
   wp -> next = free_;
   free_ = wp;
