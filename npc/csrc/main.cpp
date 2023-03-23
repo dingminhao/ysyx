@@ -1,29 +1,75 @@
-#include <nvboard.h>
-#include <Vtop.h>
+#include <verilated.h>          
+#include <verilated_vcd_c.h>    
+#include <iostream>
+#include <fstream>
+#include "Vysyx_top.h"
 
-static TOP_NAME dut;
+using namespace std;
 
-void nvboard_bind_all_pins(Vtop* top);
+static Vysyx_top* top;
+static VerilatedVcdC * tfp;
+static vluint64_t main_time = 0;
+static const vluint64_t sim_time = 1000;
 
-static void single_cycle() {
-  dut.clk = 0; dut.eval();
-  dut.clk = 1; dut.eval();
+// inst.bin
+// inst 0: 1 + zero = reg1 1+0=1
+// inst 1: 2 + zero = reg1 2+0=2
+// inst 2: 1 + reg1 = reg1 1+2=3
+int inst_rom[65536];
+
+
+uint32_t paddr_read(uint64_t addr, int len){
+  int index = (addr - 0x80000000)/4;
+  if(index >= 0 && index <= 5)
+    return inst_rom[index];
+  return 0;
 }
 
-static void reset(int n) {
-  dut.rst = 1;
-  while (n -- > 0) single_cycle();
-  dut.rst = 0;
-}
+int main(int argc, char **argv)
+{
+  inst_rom[0] = 0x00108093;
+  inst_rom[1] = 0x00108093;
+  inst_rom[2] = 0x00108093;
+  inst_rom[3] = 0x00108093;
+  inst_rom[4] = 0x00108093;
+  inst_rom[5] = 0x00108093;
+  // initialization
+  Verilated::commandArgs(argc, argv);
+  Verilated::traceEverOn(true);
 
-int main() {
-  nvboard_bind_all_pins(&dut);
-  nvboard_init();
+	top = new Vysyx_top;
+  tfp = new VerilatedVcdC;
 
-  reset(10);
-
-  while(1) {
-    nvboard_update();
-    single_cycle();
-  }
+  top->trace(tfp, 5);
+  tfp->open("top.vcd");
+	int i = 0;
+	while( !Verilated::gotFinish() && main_time < sim_time && i < 6)
+	{
+	  if( main_time % 10 == 0 ) top->clk = 0;
+	  if( main_time % 10 == 5 ) top->clk = 1;
+		  
+	  if( main_time < 10 )
+	  {
+		top->rst = 1;
+	  }
+	  else
+	  {
+	    top->rst = 0;
+		if( main_time % 10 == 0 ) {
+		  top->inst = paddr_read(top->in_addr, 4);
+      i++;
+      printf("%08x\n",top->inst);
+      }
+	  }
+	  top->eval();
+	  tfp->dump(main_time);
+	  main_time++;
+	}
+		
+  // clean
+  tfp->close();
+  delete top;
+  delete tfp;
+  exit(0);
+  return 0;
 }
