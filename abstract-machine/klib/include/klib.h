@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-//#define __NATIVE_USE_KLIB__
+//#define __NATIVE_USE_KLIB__ //决定你的klib是否被native连接
 
 // string.h
 void  *memset    (void *s, int c, size_t n);
@@ -30,6 +30,7 @@ void  *malloc    (size_t size);
 void   free      (void *ptr);
 int    abs       (int x);
 int    atoi      (const char *nptr);
+char* itoa(int num, char* str, int radix);
 
 // stdio.h
 int    printf    (const char *format, ...);

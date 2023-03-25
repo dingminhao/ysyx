@@ -18,25 +18,33 @@
 #include <cpu/difftest.h>
 #include <locale.h>
 #include <watchpoint.h>
+#include "Ring_buffer.h"
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
  * This is useful when you use the `si' command.
  * You can modify this value as you want.
  */
+
+
 #define MAX_INST_TO_PRINT 10
 
 CPU_state cpu = {};
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
-
+Ring_buffer R_buffer = {};
 void device_update();
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
+  #ifdef CONFIG_WR_BUFFER
+  WriteRingBuffer(&R_buffer, _this->logbuf);
+  R_buffer.index++;
+  R_buffer.index = R_buffer.index % Ring_buffer_size;
+  #endif
 #ifdef CONFIG_ITRACE_COND
   if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
 #endif
-  if(update_wp()) nemu_state.state = NEMU_STOP;
+  //if(update_wp()) nemu_state.state = NEMU_STOP;
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
 }
@@ -47,7 +55,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   isa_exec_once(s);    //会随着取址的方式修改s->snpc
   cpu.pc = s->dnpc;   //上面代码执行完之后会更新snpc指向下一条指令
 #ifdef CONFIG_ITRACE
-  char *p = s->logbuf; // BUG???
+  char *p = s->logbuf; 
   p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc); // 將最大數據爲s->logbuf的數據寫入p
   int ilen = s->snpc - s->pc; //指令的长度
   int i;
@@ -80,6 +88,10 @@ static void execute(uint64_t n) {
     if (nemu_state.state != NEMU_RUNNING) break;
     IFDEF(CONFIG_DEVICE, device_update());
   }
+  #ifdef CONFIG_WR_BUFFER
+  PrintfRingBuffer(&R_buffer);
+  FreeRingBuffer(&R_buffer);
+  #endif
 }
 
 static void statistic() {
@@ -105,7 +117,9 @@ void cpu_exec(uint64_t n) {
       return;
     default: nemu_state.state = NEMU_RUNNING;
   }
-
+  #ifdef CONFIG_WR_BUFFER
+  InitRingBuffer(&R_buffer, Ring_buffer_size); //初始化*/
+  #endif
   uint64_t timer_start = get_time();
 
   execute(n);
