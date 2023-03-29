@@ -34,10 +34,10 @@ $(BIN): $(VSRCS) $(CSRCS)
 all: default
 
 run: $(BIN)
-	@$^ $(IMG)
-
-
-
+	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
+	$(BIN) $(IMG)
+	@echo $(BIN) $(IMG)
+	
 clean:
 	rm -rf $(BUILD_DIR)
 
