@@ -22,6 +22,7 @@ CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*
 INCFLAGS = $(addprefix -I, $(INC_PATH))
 CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
 LDFLAGS += -lSDL2 -lSDL2_image
+IMG ?=
 
 $(BIN): $(VSRCS) $(CSRCS)
 	@rm -rf $(OBJ_DIR)
@@ -33,8 +34,7 @@ $(BIN): $(VSRCS) $(CSRCS)
 all: default
 
 run: $(BIN)
-	@$^
-	./build/ysyx_top
+	@$^ 
 	gtkwave top.vcd
 clean:
 	rm -rf $(BUILD_DIR)
