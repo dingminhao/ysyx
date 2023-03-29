@@ -34,8 +34,10 @@ $(BIN): $(VSRCS) $(CSRCS)
 all: default
 
 run: $(BIN)
-	@$^ 
-	gtkwave top.vcd
+	@$^ $(IMG)
+
+
+
 clean:
 	rm -rf $(BUILD_DIR)
 

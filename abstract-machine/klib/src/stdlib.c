@@ -58,14 +58,12 @@ char* itoa(int num, char* str, int radix) {
   return str;
 }
 
+char *start = NULL;
 void *malloc(size_t size) {
-  // On native, malloc() will be called during initializaion of C runtime.
-  // Therefore do not call panic() here, else it will yield a dead recursion:
-  //   panic() -> putchar() -> (glibc) -> malloc() -> panic()
-#if !(defined(__ISA_NATIVE__) && defined(__NATIVE_USE_KLIB__))
-  panic("Not implemented");
-#endif
-  return NULL;
+  if(start == NULL) start = heap.start;
+  char* last = start;
+  start = start + size;
+  return last;
 }
 
 void free(void *ptr) {
