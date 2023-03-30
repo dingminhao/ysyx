@@ -6,63 +6,79 @@ module ysyx_top (
     input wire [31:0] inst,
     output wire [`REG_BUS] in_addr
 );
+// jal jalr
+wire jump_flag;
+wire [`REG_BUS]jump_addr;
 
-wire [`REG_BUS]rs1_data;
-wire [`REG_BUS]rs2_data;
-reg [`REG_BUS]rd_data;
+wire [`REG_BUS]rd_data;
 
-wire en_w;
-wire [4:0] waddr;
+
+wire access_rs2;
+wire access_rd;
+wire [4:0] rd_waddr;
+
 wire [4:0] raddr1;
 wire [4:0] raddr2;
 
 wire [7:0] inst_type;
 
-wire [`REG_BUS] op1;
-wire [`REG_BUS] op2;
+wire [`REG_BUS] rs1;
+wire [`REG_BUS] rs2;
 
+wire[`REG_BUS] dec_imm;
+wire[`DECINFO_WIDTH-1:0] dec_info_bus;
 
 ysyx_22051145_ifu IFU( 
     .rst(rst),
     .clk(clk),
+    .jump_flag(jump_flag),
+    .jump_addr(jump_addr),
     .in_addr(in_addr)
 );
 
 ysyx_22051145_idstage Idstage(
-    .rst(rst),
     .inst(inst),
-    .rs1_data(rs1_data),
-    .rs2_data(rs2_data),
 
-    .en_w(en_w),
-    .waddr(waddr),
+    .access_rd(access_rd),
+    .rd_waddr_o(rd_waddr),
 
-    .raddr1(raddr1),
-    .raddr2(raddr2),
+    .rs1_raddr_o(raddr1),
+    .rs2_raddr_o(raddr2),
+    .dec_imm_o(dec_imm),
 
-    .inst_type(inst_type),
-    .op1(op1),
-    .op2(op2)
+    .dec_info_bus_o(dec_info_bus)
+
 );
 
 ysyx_22051145_exestage Exestage(
-    .rst(rst),
-    .inst_type(inst_type),
-    .op1(op1),
-    .op2(op2),
-    .rd_data(rd_data)
+    .pc(in_addr),
+
+    .rs1(rs1),
+    .rs2(rs2),
+    .dec_imm(dec_imm),
+
+    .dec_info_bus(dec_info_bus),
+
+    .access_rs2(access_rs2),
+
+    .jump_flag(jump_flag),
+    .jump_addr(jump_addr),
+    .wbck_dest_dat(rd_data)
 );
 
 ysyx_22051145_regfile Regfile(
     .rst(rst),
     .clk(clk),
     .w_data(rd_data),
-    .waddr(waddr),
+
+    .waddr(rd_waddr),
+
     .raddr1(raddr1),
     .raddr2(raddr2),
-    .en_w(en_w),
-    .rdata_1(rs1_data),
-    .rdata_2(rs2_data)
+
+    .en_w(access_rd),
+    .rdata_1(rs1),
+    .rdata_2(rs2)
 );
     
 endmodule
