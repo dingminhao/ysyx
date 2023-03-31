@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 	{
 	  if( main_time % 10 == 0 ) top->clk = 0;
 	  if( main_time % 10 == 5 ) top->clk = 1;
-		  
+		
 	  if( main_time < 10 )
 	  {
 		  top->rst = 1;
@@ -51,7 +51,9 @@ int main(int argc, char **argv)
 	  else
 	  {
       if( main_time % 10 == 5 ) {
+      //  printf("%ld, %lx,", main_time, top->in_addr);
         top->inst = paddr_read(top->in_addr, 4);
+        printf("%08x\n", top->inst);
         i++;
       }
 	    top->rst = 0;
