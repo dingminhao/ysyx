@@ -19,7 +19,7 @@ module ysyx_22051145_regfile(
 reg [63:0] gpr[0 : 31];
 integer i;
 
-always @(posedge clk)
+always @(negedge clk)
     begin
         if(rst == 1'b1) begin 
             for(i = 0; i < 32; i++)
