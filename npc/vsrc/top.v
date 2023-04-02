@@ -2,21 +2,17 @@
 `include "defines.v"
 module ysyx_top (
     input wire clk,
-    input wire rst,
-    input wire [31:0] inst,
-    output wire [`REG_BUS] in_addr
+    input wire rst
 );
 // jal jalr
 wire jump_flag;
 wire [`REG_BUS]jump_addr;
-
+wire [`REG_BUS] in_addr;
 wire [`REG_BUS]rd_data;
-
-
 wire access_rs2;
 wire access_rd;
 wire [4:0] rd_waddr;
-
+wire [31:0] inst;
 wire [4:0] raddr1;
 wire [4:0] raddr2;
 
@@ -34,6 +30,13 @@ ysyx_22051145_ifu IFU(
     .jump_flag(jump_flag),
     .jump_addr(jump_addr),
     .in_addr(in_addr)
+);
+
+ysyx_22051145_fetch Fetch (
+
+    .inst_addr(in_addr),
+    .inst_data(inst)
+
 );
 
 ysyx_22051145_idstage Idstage(

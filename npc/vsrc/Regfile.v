@@ -19,7 +19,7 @@ module ysyx_22051145_regfile(
 reg [63:0] gpr[0 : 31];
 integer i;
 
-always @(negedge clk)
+always @(posedge clk)
     begin
         if(rst == 1'b1) begin 
             for(i = 0; i < 32; i++)
@@ -32,5 +32,7 @@ always @(negedge clk)
 
     assign rdata_1 = gpr[raddr1];
     assign rdata_2 = gpr[raddr2];
-
+  /************仿真使用：传递二维数组指针************/
+  import "DPI-C" function void set_gpr_ptr(input logic [63:0] a[]);
+  initial set_gpr_ptr(gpr);  // rf为通用寄存器的二维数组变量
 endmodule

@@ -115,12 +115,7 @@ module ysyx_22051145_idstage (
     wire inst_mret = (inst == `INST_MRET);
 
 
-    // 将指令分类
-    wire inst_type_load = opcode_0000011;
-    wire inst_type_store = opcode_0100011;
-    wire inst_type_branch = opcode_1100011;
-    wire inst_type_muldiv = inst_mul | inst_mulh | inst_mulhsu | inst_mulhu | inst_div | inst_divu | inst_rem | inst_remu;
-    wire inst_type_div = inst_div | inst_divu | inst_rem | inst_remu;
+
 
     wire[`DECINFO_ALU_BUS_WIDTH-1:0] dec_alu_info_bus;
     assign dec_alu_info_bus[`DECINFO_GRP_BUS] = `DECINFO_GRP_ALU;
@@ -187,7 +182,12 @@ module ysyx_22051145_idstage (
     assign dec_sys_info_bus[`DECINFO_SYS_NOP] = inst_nop;
     assign dec_sys_info_bus[`DECINFO_SYS_MRET] = inst_mret;
     assign dec_sys_info_bus[`DECINFO_SYS_FENCE] = inst_fence | inst_fence_i;
-    
+     // 将指令分类
+    wire inst_type_load = opcode_0000011;
+    wire inst_type_store = opcode_0100011;
+    wire inst_type_branch = opcode_1100011;
+    wire inst_type_muldiv = inst_mul | inst_mulh | inst_mulhsu | inst_mulhu | inst_div | inst_divu | inst_rem | inst_remu;
+    wire inst_type_div = inst_div | inst_divu | inst_rem | inst_remu;   
     wire op_alu = inst_lui | inst_auipc | opcode_0010011 | (opcode_0110011 & (~inst_type_muldiv));
     wire op_bjp = inst_jal | inst_jalr | inst_type_branch;
     wire op_muldiv = inst_type_muldiv;
@@ -242,6 +242,7 @@ module ysyx_22051145_idstage (
                       (~inst_fence) &
                       (~inst_fence_i) &
                       (~inst_mret);
+
     assign rs1_raddr_o = access_rs1?rs1: 5'b0;
 // rs2的地址输出
     wire access_rs2 = opcode_0110011 | inst_type_store | inst_type_branch;
@@ -249,7 +250,5 @@ module ysyx_22051145_idstage (
 // rd的地址输出
     assign access_rd = inst_lui | inst_auipc | inst_jal | inst_jalr | inst_type_load | opcode_0010011 | opcode_0110011;
     assign rd_waddr_o = access_rd? rd: 5'h0;
-
-    
 
 endmodule
