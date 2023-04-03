@@ -9,15 +9,17 @@
 #include <Vysyx_top__Dpi.h>
 #include "verilated_dpi.h"
 #include <vector>
-#include <sim_top.h>
 #include "simMem.h"
+#include "itrace.h"
+#include <iomanip>
+
 
 extern uint64_t* cpu_gpr;
 extern uint64_t cpu_pc;
 
 class Sim_top {
 private:
-    Vtop* top;
+    Vysyx_top* top;
     VerilatedContext* contextp;
     VerilatedVcdC* tfp;
     uint64_t* reg;
@@ -29,11 +31,11 @@ private:
     };
     /*sdbToollist sdb的列表*/
     vector<sdb_tool> sdbToollist = {
-        {"difftest",false},
+        {.name = "difftest",.isok = false},
         {"wp",false},
-        {"wave",false},
+        {"wave",true},
         {"reg",false},
-        {"itrace",false},
+        {"itrace",true},
         {"mtrace",false},
         {"ftrace",false},
         {"dtrace",false}
@@ -51,6 +53,7 @@ public:
         TOP_RUNNING
     };
     SimMem* mem;
+    Itrace itrace;
     Sim_top();
     ~Sim_top();
     Vysyx_top* getTop();
@@ -59,6 +62,7 @@ public:
     uint64_t getRegVal(int idx);
     uint64_t getRegVal(const char* str);
     void printRegisterFile();
+    void scanMem(paddr_t addr, uint32_t len);
     void excute(int32_t t);
     void excute();
     void sdbOn(const char* sdbname);
@@ -66,5 +70,5 @@ public:
     void sdbStatus();
     void sdbRun(void);
     bool isSdbOk(const char* sdbname);
-}
+};
 #endif

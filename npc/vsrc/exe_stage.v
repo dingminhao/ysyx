@@ -13,14 +13,6 @@ module ysyx_22051145_exestage(
     output [63:0] jump_addr, //跳跃地址
     output [63:0] wbck_dest_dat
 );
-    wire e_break ;
-    assign e_break = (dec_info_bus[`DECINFO_GRP_BUS] == `DECINFO_GRP_SYS) && (dec_info_bus[`DECINFO_SYS_EBREAK] == 1'b1);
-    import "DPI-C" function void ebreak(
-        input logic e_break,
-    );
-    always @(*) begin
-        ebreak(e_break);
-    end
 
     wire [63:0] alu_op1;
     wire [63:0] alu_op2;
@@ -60,5 +52,15 @@ module ysyx_22051145_exestage(
 
     assign wbck_dest_dat = ({64{alu_flag}} & alu_wbck_dat) | ({64{bjp_flag}} & bjp_wbck_dat);
 
+
+
+
+    wire e_break ;
+    assign e_break = (dec_info_bus[`DECINFO_GRP_BUS] == `DECINFO_GRP_SYS) && (dec_info_bus[`DECINFO_SYS_EBREAK] == 1'b1);
+    always @(*) begin
+    if (e_break) begin
+      $finish;
+    end
+    end
 
 endmodule

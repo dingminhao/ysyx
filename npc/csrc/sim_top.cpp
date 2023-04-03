@@ -1,4 +1,4 @@
-#include "sim_top.h"
+#include "./include/sim_top.h"
 using namespace std;
 /*
     Vtop* top;
@@ -8,7 +8,6 @@ using namespace std;
     uint64_t pc;
 */
 #define Reg_Num 32
-
 static const char* regs[] = {
     "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
     "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
@@ -23,7 +22,7 @@ Sim_top::Sim_top() {
     top = new Vysyx_top;
     tfp = new VerilatedVcdC;
     contextp->traceEverOn(true);
-    top->trace(tfp, 0);
+    top->trace(tfp, 5);
     tfp->open("top.vcd");
 
     this -> top_status = TOP_RUNNING;
@@ -33,7 +32,7 @@ Sim_top::Sim_top() {
  * @brief Destroy the Sim_top::Simtop object
  * 
  */
-Sim_top::~Simtop() {
+Sim_top::~Sim_top() {
     tfp->close();
     delete tfp;
     delete top;
@@ -66,6 +65,19 @@ void Sim_top::excute() {
     }
 }
 
+void Sim_top::excute(int32_t t) {
+    bool val;
+    val = (t == 1);
+    top_status = TOP_RUNNING;
+    while((!top->contextp()->gotFinish()) && (t--)) {
+        if(top_status != TOP_RUNNING) {
+            cout << "top_status:STOP" << endl;
+            break;
+        }
+        stepCycle(val);
+    }
+}
+
 
 int Sim_top::npcTrap() {
     uint64_t a0 = reg[10];
@@ -92,6 +104,13 @@ int Sim_top::npcTrap() {
  */
 const char* Sim_top::getRegName(int idx) {
     return regs[idx];
+}
+
+
+
+uint64_t Sim_top::getRegVal(int idx) {
+    this->reg = cpu_gpr;
+    return reg[idx];
 }
 
 /**
@@ -149,8 +168,11 @@ void Sim_top::stepCycle(bool val) {
     changeCLK(); //上升沿
 
     /*上升沿的时候需要dampwave  下降的时候也需要*/
-    if(isSdbok("wave")) {
+    if(isSdbOk("wave")) {
         this->dampWave();
+    }
+    if(val) {
+        printf("PC : %08lx\t  inst : %08lx\n", this->pc, this->mem->paddr_read(this->pc, 4));
     }
     changeCLK();
     sdbRun();
@@ -179,7 +201,7 @@ void Sim_top::dampWave() {
  * @brief 五个时钟周期赋值rst为0
  * 
  */
-void Simtop::reset() {
+void Sim_top::reset() {
     int i = 5;
     top->rst = 1;
     while(i--) {
@@ -198,7 +220,7 @@ void Simtop::reset() {
  *
  * @param sdbname 工具名称
  */
-void Sim_top::sdbOnconst char* sdbname) {
+void Sim_top::sdbOn (const char* sdbname) {
     if(!strcmp(sdbname,"all")) {     //如果为all，将所有的sdb关掉
         for(auto& iter : sdbToollist) {
             iter.isok = true;
@@ -226,16 +248,17 @@ void Sim_top::sdbOff(const char* sdbname) {
         }
         return ;
     }
-
     for(auto& iter : sdbToollist) {
-        if(iter.name == sdbname)
-        iter.isok = false;
-        return;
+        if(!strcmp(iter.name.c_str(), sdbname)) {
+            iter.isok = false;
+            return;
+        }
     }
     cout << "cant find" << sdbname << endl;
+    return ;
 }
 
-bool Sim_top::isSdbok(const char* sdbname) {
+bool Sim_top::isSdbOk(const char* sdbname) {
     for(auto& iter : sdbToollist) {
         if(sdbname == iter.name) {
             return iter.isok;
@@ -249,14 +272,17 @@ void Sim_top::sdbRun(void) {
     if(isSdbOk("difftest")) {
 
     }
-    if(isSdbok("wp")) {
+    if(isSdbOk("wp")) {
 
     }
-    if(isSdbok("wave")) {
+    if(isSdbOk("wave")) {
 
     }
     if(isSdbOk("reg")) {
 
+    }
+    if(isSdbOk("itrace")) {
+        this->itrace.llvmDis();
     }
 }
 

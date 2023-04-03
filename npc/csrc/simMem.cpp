@@ -1,4 +1,4 @@
-#include "simMem.h"
+#include "./include/simMem.h"
 
 #include <sys/time.h>
 #include <time.h>
@@ -41,16 +41,6 @@ paddr_t SimMem::host_to_guest(uint8_t* haddr) {
     return haddr - pmem + MEMBASE;
 }
 
-
-word_t SimMem::pmem_read(paddr_t addr, int len) {
-    word_t ret = host_read(guest_to_host(addr), len);
-    return ret;
-}
-
-void SimMem::pmem_write(paddr_t addr, int len, word_t data) {
-    host_write(guest_to_host(addr), len, data);
-}
-
 /**
  * @brief 读取内存中的数据 
  * 
@@ -72,6 +62,31 @@ word_t SimMem::host_read(void* addr, int len) {
             cout << "host_read len is Wrong!"<<endl;
             return 0;
     }
+}
+
+
+void SimMem::host_write(void* addr, int len, word_t data) {
+    switch(len) {
+        case 1: 
+            *(uint8_t*)addr = data;
+        case 2:
+            *(int16_t*)addr = data;
+        case 4:
+            *(int32_t*)addr = data;
+        case 8:
+            *(int64_t*)addr = data; 
+        default:
+            break;
+    }
+}
+
+word_t SimMem::pmem_read(paddr_t addr, int len) {
+    word_t ret = host_read(guest_to_host(addr), len);
+    return ret;
+}
+
+void SimMem::pmem_write(paddr_t addr, int len, word_t data) {
+    host_write(guest_to_host(addr), len, data);
 }
 
 /**
@@ -139,7 +154,7 @@ bool SimMem::loadImage(const char* img) {
     size_t img_size = getImgSize(img);
     binaryimg.open(img, ios::in | ios::binary);
     if (!binaryimg.is_open() | img_size == -1) {
-        memccpy(pmem, init_img, sizeof(init_img));
+        memcpy(pmem, init_img, sizeof(init_img));
         cout << "load default img" << endl;
         return true;
     }

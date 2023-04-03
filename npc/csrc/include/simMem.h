@@ -36,6 +36,6 @@ public:
     void paddr_write(paddr_t addr, int len, word_t data);
     bool loadImage(const char* img);
     size_t getImgSize(const char* img);
-}
+};
 
 #endif
