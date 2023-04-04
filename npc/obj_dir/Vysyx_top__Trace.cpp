@@ -546,7 +546,7 @@ void Vysyx_top___024root__traceChgSub0(Vysyx_top___024root* vlSelf, VerilatedVcd
         tracep->chgBit(oldp+214,(vlSelf->clk));
         tracep->chgBit(oldp+215,(vlSelf->rst));
         tracep->chgQData(oldp+216,(((IData)(vlSelf->rst)
-                                     ? 0x80000000ULL
+                                     ? 0x80000004ULL
                                      : ((8U & vlSelf->ysyx_top__DOT__dec_info_bus)
                                          ? ((((- (QData)((IData)(
                                                                  (8U 

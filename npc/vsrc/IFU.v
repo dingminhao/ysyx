@@ -10,11 +10,12 @@ module ysyx_22051145_ifu (
 reg [63:0] pc;
 reg [63:0] next_pc;
 always @(posedge clk) begin //上升沿触发
-   pc <= next_pc;  
+    if(rst) pc <= 64'h80000000;
+    else pc <= next_pc;  
 end
 
 always @(*)
-    if(rst == 1) begin next_pc = 64'h80000000; end
+    if(rst == 1) begin next_pc = 64'h80000004; end
     else if(jump_flag == 1'b1) begin next_pc = jump_addr; end
     else begin next_pc = pc + 4; end
 assign in_addr = pc;

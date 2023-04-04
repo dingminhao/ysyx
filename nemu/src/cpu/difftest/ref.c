@@ -21,21 +21,33 @@
 // `direction`指定拷贝的方向, `DIFFTEST_TO_DUT`表示往DUT拷贝, `DIFFTEST_TO_REF`表示往REF拷贝
 
 void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
-  
-
+  Assert(direction == DIFFTEST_TO_REF,"difftest_mem is wrong!");
+    for(int i = 0; i < n; i++) {
+      paddr_write(addr + i, sizeof(uint8_t), *((uint8_t*)buf+i));
+    }
+  return;
 }
 
 void difftest_regcpy(void *dut, bool direction) {
-  assert(0);
+  CPU_state* reg_p = dut;
+  if(direction == DIFFTEST_TO_REF){
+    for(int i = 0; i < 32; i++) {
+      cpu.gpr[i] = reg_p->gpr[i];
+    }
+      cpu.pc = reg_p->pc;
+  } else {
+    for(int i = 0; i < 32; i++) {
+      reg_p->gpr[i] = cpu.gpr[i];
+    }
+    reg_p->pc = cpu.pc;
+  }
 }
 
 void difftest_exec(uint64_t n) {
-
-  assert(0);
+  cpu_exec(n);
 }
 
 void difftest_raise_intr(word_t NO) {
-
   assert(0);
 }
 

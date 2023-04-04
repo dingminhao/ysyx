@@ -110,8 +110,11 @@ VL_INLINE_OPT void Vysyx_top___024root___sequent__TOP__1(Vysyx_top___024root* vl
     if (__Vdlyvset__ysyx_top__DOT__Regfile__DOT__gpr__v32) {
         vlSelf->ysyx_top__DOT__Regfile__DOT__gpr[__Vdlyvdim0__ysyx_top__DOT__Regfile__DOT__gpr__v32] 
             = __Vdlyvval__ysyx_top__DOT__Regfile__DOT__gpr__v32;
+        vlSelf->ysyx_top__DOT__Regfile__DOT__gpr[0U] = 0ULL;
     }
-    vlSelf->ysyx_top__DOT__IFU__DOT__pc = vlSelf->ysyx_top__DOT__IFU__DOT__next_pc;
+    vlSelf->ysyx_top__DOT__IFU__DOT__pc = ((IData)(vlSelf->rst)
+                                            ? 0x80000000ULL
+                                            : vlSelf->ysyx_top__DOT__IFU__DOT__next_pc);
     Vysyx_top___024root____Vdpiimwrap_ysyx_top__DOT__Fetch__DOT__pmem_read_TOP(vlSelf->ysyx_top__DOT__IFU__DOT__pc, vlSelf->__Vtask_ysyx_top__DOT__Fetch__DOT__pmem_read__0__rdata);
     vlSelf->ysyx_top__DOT__Fetch__DOT___mem_data = vlSelf->__Vtask_ysyx_top__DOT__Fetch__DOT__pmem_read__0__rdata;
     Vysyx_top___024root____Vdpiimwrap_ysyx_top__DOT__Fetch__DOT__get_pc_TOP(vlSelf->ysyx_top__DOT__IFU__DOT__pc);
@@ -627,7 +630,7 @@ VL_INLINE_OPT void Vysyx_top___024root___combo__TOP__4(Vysyx_top___024root* vlSe
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vysyx_top___024root___combo__TOP__4\n"); );
     // Body
     vlSelf->ysyx_top__DOT__IFU__DOT__next_pc = ((IData)(vlSelf->rst)
-                                                 ? 0x80000000ULL
+                                                 ? 0x80000004ULL
                                                  : 
                                                 ((8U 
                                                   & vlSelf->ysyx_top__DOT__dec_info_bus)

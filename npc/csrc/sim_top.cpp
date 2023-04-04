@@ -8,6 +8,9 @@ using namespace std;
     uint64_t pc;
 */
 #define Reg_Num 32
+extern uint64_t* cpu_gpr;
+extern uint64_t cpu_pc;
+
 static const char* regs[] = {
     "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
     "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
@@ -93,7 +96,6 @@ int Sim_top::npcTrap() {
 
 
 
-
 /*        寄存器相关        */
 
 /**
@@ -166,7 +168,7 @@ void Sim_top::stepCycle(bool val) {
         return ;
     }
     changeCLK(); //上升沿
-
+    
     /*上升沿的时候需要dampwave  下降的时候也需要*/
     if(isSdbOk("wave")) {
         this->dampWave();
@@ -229,9 +231,11 @@ void Sim_top::sdbOn (const char* sdbname) {
     }
 
     for(auto& iter : sdbToollist) {
-        if(iter.name == sdbname)
-        iter.isok = true;
-        return;
+        if(!strcmp(iter.name.c_str(),sdbname)){
+            iter.isok = true;
+            return;
+        }
+
     }
     cout << "cant find" << sdbname << endl;
 }
@@ -260,7 +264,7 @@ void Sim_top::sdbOff(const char* sdbname) {
 
 bool Sim_top::isSdbOk(const char* sdbname) {
     for(auto& iter : sdbToollist) {
-        if(sdbname == iter.name) {
+        if(!strcmp(sdbname, iter.name.c_str())) {
             return iter.isok;
         }
     }
@@ -270,13 +274,13 @@ bool Sim_top::isSdbOk(const char* sdbname) {
 
 void Sim_top::sdbRun(void) {
     if(isSdbOk("difftest")) {
-
+        this->diff.difftest_step();
     }
     if(isSdbOk("wp")) {
 
     }
     if(isSdbOk("wave")) {
-
+        this->dampWave();
     }
     if(isSdbOk("reg")) {
 

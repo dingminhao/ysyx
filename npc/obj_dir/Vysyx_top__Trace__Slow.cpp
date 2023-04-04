@@ -756,7 +756,7 @@ void Vysyx_top___024root__traceFullSub0(Vysyx_top___024root* vlSelf, VerilatedVc
         tracep->fullBit(oldp+215,(vlSelf->clk));
         tracep->fullBit(oldp+216,(vlSelf->rst));
         tracep->fullQData(oldp+217,(((IData)(vlSelf->rst)
-                                      ? 0x80000000ULL
+                                      ? 0x80000004ULL
                                       : ((8U & vlSelf->ysyx_top__DOT__dec_info_bus)
                                           ? ((((- (QData)((IData)(
                                                                   (8U 

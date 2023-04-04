@@ -55,6 +55,7 @@ VM_USER_CLASSES = \
 	Console \
 	dpic \
 	main \
+	difftest \
 	itrace \
 	sdb \
 	simMem \
@@ -81,6 +82,8 @@ Console.o: /home/dmh/ysyx-workbench/npc/csrc/cppreadline/Console.cpp
 dpic.o: /home/dmh/ysyx-workbench/npc/csrc/dpic.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 main.o: /home/dmh/ysyx-workbench/npc/csrc/main.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+difftest.o: /home/dmh/ysyx-workbench/npc/csrc/sdb/difftest.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 itrace.o: /home/dmh/ysyx-workbench/npc/csrc/sdb/itrace.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<

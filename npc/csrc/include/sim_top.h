@@ -12,10 +12,9 @@
 #include "simMem.h"
 #include "itrace.h"
 #include <iomanip>
+#include "difftest.h"
 
 
-extern uint64_t* cpu_gpr;
-extern uint64_t cpu_pc;
 
 class Sim_top {
 private:
@@ -35,7 +34,7 @@ private:
         {"wp",false},
         {"wave",true},
         {"reg",false},
-        {"itrace",true},
+        {"itrace",false},
         {"mtrace",false},
         {"ftrace",false},
         {"dtrace",false}
@@ -43,7 +42,6 @@ private:
 
 private:
     void stepCycle(bool val);
-    const char* getRegName(int idx);
     void changeCLK();
     void dampWave();
 public:
@@ -54,6 +52,7 @@ public:
     };
     SimMem* mem;
     Itrace itrace;
+    Difftest diff;
     Sim_top();
     ~Sim_top();
     Vysyx_top* getTop();
@@ -61,6 +60,7 @@ public:
     int npcTrap();
     uint64_t getRegVal(int idx);
     uint64_t getRegVal(const char* str);
+    const char* getRegName(int idx);
     void printRegisterFile();
     void scanMem(paddr_t addr, uint32_t len);
     void excute(int32_t t);

@@ -26,7 +26,10 @@ always @(posedge clk)
             begin gpr[i] <= `ZERO_WORD;  end
         end else begin
             if(en_w == 1'b1)
-            gpr[waddr] <= w_data;
+            begin gpr[waddr] <= w_data;
+                  gpr[0] <= 0;         
+            end
+
         end
     end
 

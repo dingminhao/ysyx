@@ -52,6 +52,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 static void exec_once(Decode *s, vaddr_t pc) {
   s->pc = pc;
   s->snpc = pc;
+  //printf("pc:%lx\n", s->pc);
   isa_exec_once(s);    //会随着取址的方式修改s->snpc
   cpu.pc = s->dnpc;   //上面代码执行完之后会更新snpc指向下一条指令
 #ifdef CONFIG_ITRACE

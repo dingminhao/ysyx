@@ -13,6 +13,7 @@ using namespace std;
 namespace cr = CppReadline;
 using ret = cr::Console::ReturnCode;
 
+const char* nemu = "/home/dmh/ysyx-workbench/nemu/build/riscv64-nemu-interpreter-so";
 
 Sim_top* St;
 int main(int argc, char* argv[]) {
@@ -26,6 +27,7 @@ int main(int argc, char* argv[]) {
 
   size_t imgsize = St->mem->getImgSize(St->mem->imgpath.c_str());//string类不转c_str()
   St->reset();
+  St->diff.init_difftest(nemu, imgsize, 0);
 
   cr::Console c(">:");
   c.registerCommand("info", cmd_info);
@@ -52,6 +54,7 @@ int main(int argc, char* argv[]) {
       cout << "retcode 2 error" <<endl;
     }
   } while(retCode != ret::Quit);
+  St->excute(1);
   int hitgood = St->npcTrap();
   delete St;
   return hitgood;

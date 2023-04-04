@@ -553,7 +553,7 @@ void Vysyx_top___024root___settle__TOP__3(Vysyx_top___024root* vlSelf) {
         vlSelf->ysyx_top__DOT__Exestage__DOT__alu_wbck_dat = 0ULL;
     }
     vlSelf->ysyx_top__DOT__IFU__DOT__next_pc = ((IData)(vlSelf->rst)
-                                                 ? 0x80000000ULL
+                                                 ? 0x80000004ULL
                                                  : 
                                                 ((8U 
                                                   & vlSelf->ysyx_top__DOT__dec_info_bus)
