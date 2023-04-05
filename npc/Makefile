@@ -13,7 +13,7 @@ VERILATOR_FLAGS += --top ${TOP_MODULE}
 
 
 # gcc flags 
-GCC_INC_PATH = -I$(NPC_HOME)/csrc/include
+GCC_INC_PATH = -I$(NPC_HOME)/csrc/include 
 
 # llvm
 LLVM_LIB = $(shell llvm-config-14 --libs)
