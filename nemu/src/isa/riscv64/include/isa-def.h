@@ -18,9 +18,16 @@
 
 #include <common.h>
 
+ // csr 寄存器地址映射
+enum {
+  mtvec, mepc, mstatus, mcause,   //四个不同的csr寄存器
+};
+
 typedef struct {
   word_t gpr[32];  // 32个寄存器 的值
   vaddr_t pc;      // 内存指令地址
+  // CSR寄存器
+  word_t csr[4];
 } riscv64_CPU_state;
 
 // decode
