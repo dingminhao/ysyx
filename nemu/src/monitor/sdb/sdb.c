@@ -173,7 +173,6 @@ static int cmd_help(char *args) {
   /* extract the first argument */
   char *arg = strtok(NULL, " ");     //將arg分割
   int i;
-  printf("%s", arg);
   if (arg == NULL) {
     /* no argument given */
     for (i = 0; i < NR_CMD; i ++) { // 打印所有存在的命令
@@ -197,10 +196,10 @@ void sdb_set_batch_mode() {
 }
 
 void sdb_mainloop() {
-  if (is_batch_mode) {
-    cmd_c(NULL);
-    return;
-  }
+  // if (is_batch_mode) {
+  //   cmd_c(NULL);
+  //   return;
+  // }
 
   for (char *str; (str = rl_gets()) != NULL; ) {//讀取命令
     char *str_end = str + strlen(str);// 尾指針
