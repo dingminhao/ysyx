@@ -134,7 +134,7 @@ $(ARCHIVE): $(OBJS) libs
 
 ## 6. Miscellaneous
 
-### Pull newlib from github if it does not exist
+### Pull b from github if it does not exist
 ifeq ($(wildcard $(NAVY_HOME)/libs/libc/Makefile),)
   $(shell cd $(NAVY_HOME)/libs && git clone git@github.com:NJU-ProjectN/newlib-navy.git libc)
 endif

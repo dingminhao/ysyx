@@ -4,7 +4,6 @@
 #include <assert.h>
 #include <time.h>
 #include "syscall.h"
-
 // helper macros
 #define _concat(x, y) x ## y
 #define concat(x, y) _concat(x, y)
@@ -62,12 +61,22 @@ int _open(const char *path, int flags, mode_t mode) {
 }
 
 int _write(int fd, void *buf, size_t count) {
-  _exit(SYS_write);
-  return 0;
+  return _syscall_(SYS_write, fd, buf, count);
 }
 
+extern char _end[];   //链接的时候ld会默认添加一个名为_end的符号
+char *heap_ptr;
 void *_sbrk(intptr_t increment) {
-  return (void *)-1;
+  char *base;
+  if(!heap_ptr)
+    heap_ptr = (char *)_end;
+  base = heap_ptr;
+  heap_ptr += increment;
+
+  _syscall_(SYS_brk, heap_ptr, base, increment);
+
+  assert(base);
+  return base;
 }
 
 int _read(int fd, void *buf, size_t count) {

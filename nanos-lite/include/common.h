@@ -11,5 +11,5 @@
 #include <klib.h>
 #include <klib-macros.h>
 #include <debug.h>
-
+void do_syscall(Context *c);
 #endif
