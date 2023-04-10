@@ -1,6 +1,7 @@
 #include <common.h>
 #include "syscall.h"
-
+#include <sys/time.h>
+#include "fs.h"
 //#define strace
 void do_syscall(Context *c) {
   uintptr_t a[4];
@@ -34,18 +35,51 @@ void do_syscall(Context *c) {
     c->GPRx = 0; 
     break;
 
+    case SYS_open :
+    #ifdef strace
+    printf("SYS_open a1:%d,\ta2:%d,\ta3:%d\n", a[1], a[2], a[3]);
+    #endif
+    c->GPRx = fs_open((const char *)a[1], a[2], a[3]);
+    break;
+
     // write调用
     case SYS_write :
     #ifdef strace
-      printf("SYS_write!\n");
+    printf("SYS_write a1:%d,\ta2:%p,\ta3:%d\n", a[1], (void *)a[2], a[3]);
     #endif
-    if(a[1] == 1 || a[1] == 2) { //如果fd是1或2(分别代表stdout和stderr), 则将buf为首地址的len字节输出到串口(使用putch()即可). 
-      int len = a[3];
-      while(len--) {
-        putch(*(char *)a[2]++);
-      }
-    }
-    c->GPRx = a[3];
+    c->GPRx = fs_write(a[1], (void *)a[2], a[3]);
+    break;
+
+    case SYS_read :
+    #ifdef strace
+    printf("SYS_read a1:%d,\ta2:%p,\ta3:%d\n", a[1], (void *)a[2], a[3]);
+    #endif
+    c->GPRx = fs_read(a[1], (void *)a[2], a[3]);
+    break;
+
+    case SYS_close :
+    #ifdef strace
+    printf("SYS_close a1:%d,\ta2:%d,\ta3:%d\n", a[1], a[2], a[3]);
+    #endif
+    c->GPRx = fs_close(a[1]);
+    break;
+
+    case SYS_lseek :
+    #ifdef strace
+    printf("SYS_lseek a1:%d,\ta2:%d,\ta3:%d\n", a[1], a[2], a[3]);
+    #endif
+    c->GPRx = fs_lseek(a[1], a[2], a[3]);
+    break;
+
+    case SYS_gettimeofday :
+    #ifdef strace
+    printf("SYS_gettimeofday a1:%d,\ta2:%d,\ta3:%d\n", a[1], a[2], a[3]);
+    #endif
+    struct timeval* tv = (struct timeval*)a[1];
+    uint64_t us = io_read(AM_TIMER_UPTIME).us;
+    tv->tv_sec = us / 1000000;
+    tv->tv_usec = us % 1000000;
+    c->GPRx = 0;
     break;
 
     default: panic("Unhandled syscall ID = %d", a[0]);

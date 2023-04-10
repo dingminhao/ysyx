@@ -47,14 +47,14 @@ ARCHIVE  = $(WORK_DIR)/build/$(NAME)-$(ISA).a
 
 ### Add default libraries for ISA != native
 ifneq ($(ISA), native)
-LIBS += libc libos
+LIBS += libc libos libfixedptc
 CFLAGS += -U_FORTIFY_SOURCE  # fix compile error in Newlib on ubuntu
 else
 WL = -Wl,
 endif
 
 ### 32-bit ISA may need compiler-rt to support 64-bit mul/div
-ifneq ($(findstring $(ISA), x86|mips32|riscv32|loongarch32r),)
+ifneq ($(findstring $(ISA), x86|mips32|riscv32),)
 LIBS += compiler-rt
 endif
 
@@ -134,7 +134,7 @@ $(ARCHIVE): $(OBJS) libs
 
 ## 6. Miscellaneous
 
-### Pull b from github if it does not exist
+### Pull newlib from github if it does not exist
 ifeq ($(wildcard $(NAVY_HOME)/libs/libc/Makefile),)
   $(shell cd $(NAVY_HOME)/libs && git clone git@github.com:NJU-ProjectN/newlib-navy.git libc)
 endif
@@ -166,8 +166,8 @@ $(CLEAN_ALL):
 .PHONY: clean-all $(CLEAN_ALL)
 
 ### Build fsimg and ramdisk for Nanos-lite
-APPS =
-TESTS = dummy hello
+APPS =   
+TESTS =   dummy hello file-test timer-test event-test
 
 fsimg: $(addprefix apps/, $(APPS)) $(addprefix tests/, $(TESTS))
 	-for t in $^; do $(MAKE) -s -C $(NAVY_HOME)/$$t install; done

@@ -24,7 +24,7 @@ void init_proc() {
 
   Log("Initializing processes...");
 
-  naive_uload(NULL, "");
+  naive_uload(NULL, "/bin/event-test");
 
 }
 

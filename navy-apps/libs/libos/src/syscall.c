@@ -55,14 +55,7 @@ void _exit(int status) {
   while (1);
 }
 
-int _open(const char *path, int flags, mode_t mode) {
-  _exit(SYS_open);
-  return 0;
-}
 
-int _write(int fd, void *buf, size_t count) {
-  return _syscall_(SYS_write, fd, buf, count);
-}
 
 extern char _end[];   //链接的时候ld会默认添加一个名为_end的符号
 char *heap_ptr;
@@ -73,29 +66,46 @@ void *_sbrk(intptr_t increment) {
   base = heap_ptr;
   heap_ptr += increment;
 
-  _syscall_(SYS_brk, heap_ptr, base, increment);
+  //_syscall_(SYS_brk, heap_ptr, base, increment);
 
   assert(base);
-  return base;
+  return (base);
 }
 
-int _read(int fd, void *buf, size_t count) {
-  _exit(SYS_read);
-  return 0;
+
+
+                /*文件操作*/
+int _open(const char* path, int flags, mode_t mode) {
+
+  return _syscall_(SYS_open, path, flags, mode);
+}
+
+int _write(int fd, void* buf, size_t count) {
+
+  return _syscall_(SYS_write, fd, buf, count);
+}
+
+
+int _read(int fd, void* buf, size_t count) {
+
+  return _syscall_(SYS_read, fd, buf, count);
 }
 
 int _close(int fd) {
-  _exit(SYS_close);
-  return 0;
+
+  return _syscall_(SYS_close, fd, 0, 0);
 }
 
 off_t _lseek(int fd, off_t offset, int whence) {
-  _exit(SYS_lseek);
-  return 0;
+  return _syscall_(SYS_lseek, fd, offset, whence);
 }
 
+
+
+
+
 int _gettimeofday(struct timeval *tv, struct timezone *tz) {
-  _exit(SYS_gettimeofday);
+  _syscall_(SYS_gettimeofday, tv, tz, 0);
   return 0;
 }
 
