@@ -1,4 +1,4 @@
-#include "./include/simMem.h"
+#include "./include/simMem.h" 
 
 #include <sys/time.h>
 #include <time.h>
@@ -16,12 +16,10 @@ const uint32_t init_img[] = {
 
 SimMem::SimMem() {
     cout << "npc内存初始化" << endl;
-    Device = new DeviceManager;
 }
 
 SimMem::~SimMem() {
     cout << "npc内存销毁" << endl;
-    delete Device;
 }
 /**
  * @brief 地址映射
@@ -117,7 +115,6 @@ word_t SimMem::paddr_read(paddr_t addr, int len) {
     if(in_pmem(addr)) {
         return pmem_read(addr, len);
     }
-    return Device->read(addr);
     out_of_bound(addr);
     return 0;
 }
@@ -128,7 +125,6 @@ void SimMem::paddr_write(paddr_t addr, int len, word_t data) {
         pmem_write(addr, len, data);
         return;
     }
-    Device->write(addr, data ,len);
     out_of_bound(addr);
 }
 

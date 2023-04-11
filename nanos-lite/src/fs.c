@@ -62,13 +62,6 @@ static Finfo file_table[] __attribute__((used)) = {
  *
  */
 void init_fs() {
-  /* 获取屏幕信息 没有实现 sscanf 函数,无法使用 */
-  // int w, h;
-  // char dispinfo[32];
-  // dispinfo_read(dispinfo, 0, 32);
-  // sscanf(dispinfo, "WIDTH:%d\nHEIGHT:%d\n", &w, &h);
-
-
   // 直接读取屏幕信息
   AM_GPU_CONFIG_T dispinfo = io_read(AM_GPU_CONFIG);
   Log("dispinfo_WIDTH:%d,dispinfo_HEIGHT:%d", dispinfo.width, dispinfo.height);
@@ -117,7 +110,6 @@ size_t fs_read(int fd, void* buf, size_t len) {
   size_t disk_offset = file_table[fd].disk_offset;
   size_t file_size = file_table[fd].size;
   size_t open_offset = file_table[fd].open_offset;
-
   // devices
   if (fd < FD_NUM) {
     return file_table[fd].read(buf, 0, len);

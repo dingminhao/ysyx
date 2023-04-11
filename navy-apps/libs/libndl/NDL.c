@@ -3,7 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/time.h>
+#include <assert.h>
 static int evtdev = -1;
 static int fbdev = -1;
 static int screen_w = 0, screen_h = 0;
@@ -20,8 +22,22 @@ int NDL_PollEvent(char *buf, int len) {
   int fd = open("/dev/events", O_RDONLY);
   return read(fd, buf, sizeof(char) * len);
 }
-
+static int oc_w, oc_h;
 void NDL_OpenCanvas(int *w, int *h) {
+  char dispinfo[32];
+  int dispinfo_fd = open("/proc/dispinfo", O_RDONLY);
+  read(dispinfo_fd, dispinfo, sizeof(dispinfo));
+  sscanf(dispinfo, "WIDTH:%d\nHEIGHT:%d\n", &oc_w, &oc_h);
+  screen_w = oc_w;
+  screen_h = oc_h;
+  close(dispinfo_fd);
+  // 将全屏幕设置为画布
+  if (*w == 0 && *h == 0) {
+    *w = oc_w;
+    *h = oc_h;
+  }
+
+
   if (getenv("NWM_APP")) {
     int fbctl = 4;
     fbdev = 5;
@@ -42,6 +58,15 @@ void NDL_OpenCanvas(int *w, int *h) {
 }
 
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
+  static int first = 0;
+  static int fd;
+  if (!first) {
+    fd = open("/dev/fb", O_RDWR);
+  }
+  size_t offset = ((size_t)x << 32) | y;
+  size_t len = ((size_t)w << 32) | h;
+  lseek(fd, offset, SEEK_SET);
+  write(fd, pixels, len);
 }
 
 void NDL_OpenAudio(int freq, int channels, int samples) {

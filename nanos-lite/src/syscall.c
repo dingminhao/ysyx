@@ -52,7 +52,7 @@ void do_syscall(Context *c) {
 
     case SYS_read :
     #ifdef strace
-    printf("SYS_read a1:%d,\ta2:%p,\ta3:%d\n", a[1], (void *)a[2], a[3]);
+    printf("SYS_read a0: %d, a1:%d,\ta2:%p,\ta3:%d\n", a[0], a[1], (void *)a[2], a[3]);
     #endif
     c->GPRx = fs_read(a[1], (void *)a[2], a[3]);
     break;
