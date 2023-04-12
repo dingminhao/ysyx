@@ -112,6 +112,7 @@ void SimMem::out_of_bound(paddr_t addr) {
 }
 
 word_t SimMem::paddr_read(paddr_t addr, int len) {
+    
     if(in_pmem(addr)) {
         return pmem_read(addr, len);
     }

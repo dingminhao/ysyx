@@ -273,7 +273,7 @@ bool Sim_top::isSdbOk(const char* sdbname) {
 }
 
 void Sim_top::sdbRun(void) {
-    if(isSdbOk("difftest")) {
+    if(isSdbOk("difftest") && top->rst != 1) {
         this->diff.difftest_step();
     }
     if(isSdbOk("wp")) {
