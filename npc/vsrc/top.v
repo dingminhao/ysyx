@@ -132,6 +132,7 @@ module ysyx_top (
       .csr_mcause_i    (csr_mcause_i),
       .csr_mtval_i     (csr_mtval_i),
       .csr_mtvec_i     (csr_mtvec_i),
+      
       .csr_mstatus_i_en(csr_mstatus_i_en),
       .csr_mepc_i_en   (csr_mepc_i_en),
       .csr_mcause_i_en (csr_mcause_i_en),

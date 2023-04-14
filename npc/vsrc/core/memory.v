@@ -96,12 +96,6 @@ module memory (
     input longint wdata,
     input byte wmask
   );
-
-  // always @(*) begin
-  //   pmem_read(_raddr, _mem_read);
-  //   pmem_write(_waddr, _mem_write, _wmask);
-  // end
-
   always @(posedge clk) begin
     pmem_read(_raddr, _mem_read);
     pmem_write(_waddr, _mem_write, _wmask);

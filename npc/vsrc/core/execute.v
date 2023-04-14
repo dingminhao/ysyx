@@ -28,11 +28,11 @@ module execute (
   wire _excop_jalr = (exc_op == `EXCOP_JALR);
   wire _excop_load = (exc_op == `EXCOP_LOAD);
   wire _excop_store = (exc_op == `EXCOP_STORE);
-  wire _excop_branch = (exc_op == `EXCOP_BRANCH);
+  wire _excop_branch = (exc_op == `EXCOP_BRANCH); //
   wire _excop_opimm = (exc_op == `EXCOP_OPIMM);
   wire _excop_opimm32 = (exc_op == `EXCOP_OPIMM32);
-  wire _excop_op = (exc_op == `EXCOP_OP);
-  wire _excop_op32 = (exc_op == `EXCOP_OP32);
+  wire _excop_op = (exc_op == `EXCOP_OP);  // 
+  wire _excop_op32 = (exc_op == `EXCOP_OP32);  // 
   wire _excop_csr = (exc_op == `EXCOP_CSR);
   wire _excop_ebreak = (exc_op == `EXCOP_EBREAK);
   wire _excop_none = (exc_op == `EXCOP_NONE);
