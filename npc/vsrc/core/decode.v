@@ -1,4 +1,4 @@
-`include "../sysconfig.v"
+`include "./../sysconfig.v"
 
 
 module dcode (
@@ -24,9 +24,9 @@ module dcode (
 
 );
 
-  wire [`INST_LEN-1:0] _inst = inst_data; //得到指令数据
+  wire [`INST_LEN-1:0] _inst = inst_data;
   /* 指令分解 */
-  wire [4:0] _rd = _inst[11:7]; 
+  wire [4:0] _rd = _inst[11:7];
   wire [2:0] _func3 = _inst[14:12];
   wire [4:0] _rs1 = _inst[19:15];
   wire [4:0] _rs2 = _inst[24:20];
@@ -48,6 +48,9 @@ module dcode (
   /* 分解_opcode */
   wire [6:0] _opcode = _inst[6:0];
   /* 1:0 */
+  wire _opcode_1_0_00 = (_opcode[1:0] == 2'b00);
+  wire _opcode_1_0_01 = (_opcode[1:0] == 2'b01);
+  wire _opcode_1_0_10 = (_opcode[1:0] == 2'b10);
   wire _opcode_1_0_11 = (_opcode[1:0] == 2'b11);
   /* 4:2 */
   wire _opcode_4_2_000 = (_opcode[4:2] == 3'b000);
@@ -57,6 +60,7 @@ module dcode (
   wire _opcode_4_2_100 = (_opcode[4:2] == 3'b100);
   wire _opcode_4_2_101 = (_opcode[4:2] == 3'b101);
   wire _opcode_4_2_110 = (_opcode[4:2] == 3'b110);
+  wire _opcode_4_2_111 = (_opcode[4:2] == 3'b111);
   /* 6:5 */
   wire _opcode_6_5_00 = (_opcode[6:5] == 2'b00);
   wire _opcode_6_5_01 = (_opcode[6:5] == 2'b01);
@@ -164,15 +168,15 @@ module dcode (
   // rv64 only
   wire _inst_lwu = _type_load & _func3_110;
   wire _inst_ld = _type_load & _func3_011;
-  wire _inst_sd = _type_store & _func3_011;
-  wire _inst_slli = _type_op_imm & _func3_001 & (_func7[6:1] == 6'b000000);
-  wire _inst_srli = _type_op_imm & _func3_101 & (_func7[6:1] == 6'b000000);
-  wire _inst_srai = _type_op_imm & _func3_101 & (_func7[6:1] == 6'b010000);
 
   /* _type_store */
   wire _inst_sb = _type_store & _func3_000;
   wire _inst_sh = _type_store & _func3_001;
   wire _inst_sw = _type_store & _func3_010;
+
+  // rv64 only
+  wire _inst_sd = _type_store & _func3_011;
+
 
   /*_type_op_imm*/
   wire _inst_addi = _type_op_imm & _func3_000;
@@ -182,6 +186,10 @@ module dcode (
   wire _inst_ori = _type_op_imm & _func3_110;
   wire _inst_andi = _type_op_imm & _func3_111;
 
+  // rv64 only 
+  wire _inst_slli = _type_op_imm & _func3_001 & (_func7[6:1] == 6'b000000);
+  wire _inst_srli = _type_op_imm & _func3_101 & (_func7[6:1] == 6'b000000);
+  wire _inst_srai = _type_op_imm & _func3_101 & (_func7[6:1] == 6'b010000);
 
   // // rv32 
   // wire _inst_slli = _type_op_imm & _func3_001 & _func7_0000000;
@@ -268,19 +276,18 @@ module dcode (
   wire _NONE_type = ~(_R_type | _I_type | _S_type | _U_type | _J_type | _B_type);
 
   /*获取操作数  */  //TODO:一些特殊指令没有归类ecall,ebreak
-  wire _isNeed_imm = (_I_type | _S_type | _B_type | _U_type | _J_type);    //是否需要立即数
-  wire _isNeed_immCSR = (_inst_csrrci | _inst_csrrsi | _inst_csrrwi);      //是否需要立即数 CSR
+  wire _isNeed_imm = (_I_type | _S_type | _B_type | _U_type | _J_type);
+  wire _isNeed_immCSR = (_inst_csrrci | _inst_csrrsi | _inst_csrrwi);
 
   // I 型指令中, CSR 立即数占了 rs1 的位置
-  wire _isNeed_rs1 = (_R_type | _I_type | _S_type | _B_type) & (~_isNeed_immCSR);  //是否需要rs1
-  wire _isNeed_rs2 = (_R_type | _S_type | _B_type); //是否需要rs2
-  wire _isNeed_rd = (_R_type | _I_type | _U_type | _J_type); //是否需要rd
-  wire _isNeed_csr = (_inst_csrrc|_inst_csrrci|_inst_csrrs|_inst_csrrsi|_inst_csrrw|_inst_csrrwi); //是否属于csr指令
- /*解析出rs1 rs2 rd 的地址*/
-  wire [4:0] _rs1_idx = (_isNeed_rs1) ? _rs1 : 5'b0;  
+  wire _isNeed_rs1 = (_R_type | _I_type | _S_type | _B_type) & (~_isNeed_immCSR);
+  wire _isNeed_rs2 = (_R_type | _S_type | _B_type);
+  wire _isNeed_rd = (_R_type | _I_type | _U_type | _J_type);
+  wire _isNeed_csr = (_inst_csrrc|_inst_csrrci|_inst_csrrs|_inst_csrrsi|_inst_csrrw|_inst_csrrwi);
+
+  wire [4:0] _rs1_idx = (_isNeed_rs1) ? _rs1 : 5'b0;
   wire [4:0] _rs2_idx = (_isNeed_rs2) ? _rs2 : 5'b0;
   wire [4:0] _rd_idx = (_isNeed_rd) ? _rd : 5'b0;
-
   wire [`CSR_REG_ADDRWIDTH-1:0] _csr_idx = (_isNeed_csr) ? _csr : `CSR_REG_ADDRWIDTH'b0;
 
 

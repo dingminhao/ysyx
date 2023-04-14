@@ -1,4 +1,4 @@
-`include "../sysconfig.v"
+`include "./../sysconfig.v"
 module execute (
     input [         `XLEN-1:0] pc,
     input [`REG_ADDRWIDTH-1:0] rd_idx,
@@ -21,7 +21,7 @@ module execute (
     output exc_csr_valid
 );
 
-  /*执行什么种类的命令*/
+
   wire _excop_auipc = (exc_op == `EXCOP_AUIPC);
   wire _excop_lui = (exc_op == `EXCOP_LUI);
   wire _excop_jal = (exc_op == `EXCOP_JAL);

@@ -15,6 +15,7 @@ module pc (
   wire _pcop_jal = (pc_op == `PCOP_JAL);  // jal 指令: pc = pc + imm
   wire _pcop_jalr = (pc_op == `PCOP_JALR);  // jalr 指令: pc = rs1 + imm
   wire _pcop_inc4 = (pc_op == `PCOP_INC4);  // pc 自增: pc = pc +4
+  
   wire _pcop_trap = (pc_op == `PCOP_TRAP);  // trap 指令: pc = clint_pc_i
   wire _pcop_none = (pc_op == `PCOP_NONE);  // 暂停: pc = pc
 

@@ -19,13 +19,13 @@ Sim_top* St;
 int main(int argc, char* argv[]) {
   const char* path = "";
   cout << "argc:" << argc << endl;
-  path = argv[1]; // 得到bin文件的路径
+  path = argv[1];
 
   St = new Sim_top;
   St->mem->imgpath.append(path);
-  St->mem->loadImage(St->mem->imgpath.c_str()); //string类不转c_str()
+  St->mem->loadImage(St->mem->imgpath.c_str());
 
-  size_t imgsize = St->mem->getImgSize(St->mem->imgpath.c_str());//string类不转c_str()
+  size_t imgsize = St->mem->getImgSize(St->mem->imgpath.c_str());
   St->reset();
   St->diff.init_difftest(nemu, imgsize, 0);
 
@@ -53,6 +53,7 @@ int main(int argc, char* argv[]) {
   //   if(retCode == 2) {
   //     cout << "retcode 2 error" <<endl;
   //   }
+    
   // } while(retCode != ret::Quit);
   St->excute(-1);
   int hitgood = St->npcTrap();

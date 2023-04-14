@@ -1,18 +1,23 @@
 
-`include "../sysconfig.v"
+`include "./../sysconfig.v"
 
+/**
+* 取指模块
+*/
 module fetch (
-    input wire [`XLEN-1:0] inst_addr, // 指令位置
-    output wire [`INST_LEN-1:0] inst_data  // 指令数据
+    //指令地址
+    input wire [`XLEN-1:0] inst_addr,
+    //指令内容
+    output wire [`INST_LEN-1:0] inst_data
 );
 
-  wire [`XLEN-1:0] _mem_data; //存储数据
+  wire [`XLEN-1:0] _mem_data;
   import "DPI-C" function void pmem_read(
     input  longint raddr,
     output longint rdata
   );
 
-  import "DPI-C" function void get_pc( //得到此时的PC值
+  import "DPI-C" function void get_pc(
     input  longint pc,
   );
 /*  仿真使用,传递当前 pc 给仿真环境,根据pc 取指令 */

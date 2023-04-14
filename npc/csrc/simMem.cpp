@@ -70,12 +70,16 @@ void SimMem::host_write(void* addr, int len, word_t data) {
     switch(len) {
         case 1: 
             *(uint8_t*)addr = data;
+            return;
         case 2:
             *(int16_t*)addr = data;
+            return;
         case 4:
             *(int32_t*)addr = data;
+            return;
         case 8:
             *(int64_t*)addr = data; 
+            return;
         default:
             break;
     }
@@ -116,7 +120,7 @@ word_t SimMem::paddr_read(paddr_t addr, int len) {
     if(in_pmem(addr)) {
         return pmem_read(addr, len);
     }
-    out_of_bound(addr);
+    // out_of_bound(addr);
     return 0;
 }
 
@@ -126,7 +130,7 @@ void SimMem::paddr_write(paddr_t addr, int len, word_t data) {
         pmem_write(addr, len, data);
         return;
     }
-    out_of_bound(addr);
+    // out_of_bound(addr);
 }
 
 /**

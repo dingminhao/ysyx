@@ -59,6 +59,7 @@ VL_MODULE(Vysyx_top___024root) {
         CData/*0:0*/ ysyx_top__DOT__u_memory__DOT___ls8byte;
         CData/*0:0*/ ysyx_top__DOT__u_memory__DOT___ls16byte;
         CData/*0:0*/ ysyx_top__DOT__u_memory__DOT___ls32byte;
+        CData/*0:0*/ ysyx_top__DOT__u_memory__DOT___ls64byte;
         CData/*0:0*/ ysyx_top__DOT__u_memory__DOT___unsigned;
         CData/*0:0*/ ysyx_top__DOT__u_memory__DOT___signed;
         SData/*11:0*/ ysyx_top__DOT__u_dcode__DOT___csr_idx;
@@ -88,9 +89,9 @@ VL_MODULE(Vysyx_top___024root) {
         QData/*63:0*/ ysyx_top__DOT__u_execute__DOT__u_alu__DOT__u_alu_shift__DOT___srl_res;
         QData/*63:0*/ ysyx_top__DOT__u_execute__DOT__u_execute_csr__DOT___csr_exe_result;
         QData/*63:0*/ ysyx_top__DOT__u_memory__DOT___mem_read;
-        QData/*63:0*/ ysyx_top__DOT__u_memory__DOT___addr;
     };
     struct {
+        QData/*63:0*/ ysyx_top__DOT__u_memory__DOT___addr;
         VlUnpacked<QData/*63:0*/, 32> ysyx_top__DOT__u_rv64reg__DOT__rf;
     };
 

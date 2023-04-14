@@ -27,7 +27,7 @@ unsigned cmd_x(const vector<string>& input) {
 unsigned cmd_si(const vector<string>& input) {
     uint32_t n;
     if (input.size() == 2) {
-        n = atoi(input[2].c_str());
+        sscanf(input[1].c_str(), "%d", &n);
         St->excute(n);
     } else St->excute(1);
     return 0;

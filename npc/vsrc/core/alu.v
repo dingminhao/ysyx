@@ -8,17 +8,6 @@ module alu (
     //比较指令输出
     output compare_out
 
-    /* 测试用 */
-    // output [`XLEN-1:0] sra_out,
-    // output [`XLEN-1:0] srl_out,
-    // output [`XLEN-1:0] sll_out
-    // /* 标志位 */
-    // output OF,
-    // output ZF,
-    // output SLT,
-    // output CF,
-    // output SF,
-
 );
 
   //加减和逻辑

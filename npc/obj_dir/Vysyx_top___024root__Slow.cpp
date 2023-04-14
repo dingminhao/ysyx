@@ -296,6 +296,9 @@ void Vysyx_top___024root___settle__TOP__3(Vysyx_top___024root* vlSelf) {
         = (((3U == (IData)(vlSelf->ysyx_top__DOT__u_dcode__DOT___mem_op)) 
             | (0xaU == (IData)(vlSelf->ysyx_top__DOT__u_dcode__DOT___mem_op))) 
            | (7U == (IData)(vlSelf->ysyx_top__DOT__u_dcode__DOT___mem_op)));
+    vlSelf->ysyx_top__DOT__u_memory__DOT___ls64byte 
+        = ((6U == (IData)(vlSelf->ysyx_top__DOT__u_dcode__DOT___mem_op)) 
+           | (0xbU == (IData)(vlSelf->ysyx_top__DOT__u_dcode__DOT___mem_op)));
     vlSelf->ysyx_top__DOT__u_memory__DOT___unsigned 
         = (((5U == (IData)(vlSelf->ysyx_top__DOT__u_dcode__DOT___mem_op)) 
             | (4U == (IData)(vlSelf->ysyx_top__DOT__u_dcode__DOT___mem_op))) 
@@ -1938,6 +1941,7 @@ void Vysyx_top___024root___ctor_var_reset(Vysyx_top___024root* vlSelf) {
     vlSelf->ysyx_top__DOT__u_memory__DOT___ls8byte = VL_RAND_RESET_I(1);
     vlSelf->ysyx_top__DOT__u_memory__DOT___ls16byte = VL_RAND_RESET_I(1);
     vlSelf->ysyx_top__DOT__u_memory__DOT___ls32byte = VL_RAND_RESET_I(1);
+    vlSelf->ysyx_top__DOT__u_memory__DOT___ls64byte = VL_RAND_RESET_I(1);
     vlSelf->ysyx_top__DOT__u_memory__DOT___unsigned = VL_RAND_RESET_I(1);
     vlSelf->ysyx_top__DOT__u_memory__DOT___signed = VL_RAND_RESET_I(1);
     vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read = VL_RAND_RESET_Q(64);

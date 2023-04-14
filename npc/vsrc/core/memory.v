@@ -49,16 +49,15 @@ module memory (
   /* 从内存中读取的数据 */
   wire [`XLEN-1:0] _mem_read;
 
-  /* 符号扩展后的结果 TODO:改成并行编码*/
-  wire [     `XLEN-1:0] _mem__signed_out = (_ls8byte)?{{`XLEN-8{_mem_read[7]}},_mem_read[7:0]}:
-                                   (_ls16byte)?{{`XLEN-16{_mem_read[15]}},_mem_read[15:0]}:
-                                   (_ls32byte)?{{`XLEN-32{_mem_read[31]}},_mem_read[31:0]}:
-                                   _mem_read;
-  /* 不进行符号扩展的结果 TODO:改成并行编码 */
-  wire [     `XLEN-1:0] _mem__unsigned_out = (_ls8byte)?{{`XLEN-8{1'b0}},_mem_read[7:0]}:
-                                   (_ls16byte)?{{`XLEN-16{1'b0}},_mem_read[15:0]}:
-                                   (_ls32byte)?{{`XLEN-32{1'b0}},_mem_read[31:0]}:
-                                   _mem_read;
+  wire [     `XLEN-1:0] _mem__signed_out = {{`XLEN{_ls8byte}} & {{`XLEN-8{_mem_read[7]}},_mem_read[7:0]}} |
+                                   {{`XLEN{_ls16byte}}&{{`XLEN-16{_mem_read[15]}},_mem_read[15:0]}} |
+                                   {{`XLEN{_ls32byte}}&{{`XLEN-32{_mem_read[31]}},_mem_read[31:0]}} |
+                                   {{`XLEN{_ls64byte}}&{_mem_read[`XLEN-1:0]}};
+
+  wire [     `XLEN-1:0] _mem__unsigned_out = {{`XLEN{_ls8byte}} & {{`XLEN-8{1'b0}},_mem_read[7:0]}} |
+                                   {{`XLEN{_ls16byte}}&{{`XLEN-16{1'b0}},_mem_read[15:0]}} |
+                                   {{`XLEN{_ls32byte}}&{{`XLEN-32{1'b0}},_mem_read[31:0]}} |
+                                   {{`XLEN{_ls64byte}}&{_mem_read[`XLEN-1:0]}};
   /* 读取数据：选择最终结果 */
   wire [`XLEN-1:0] _mem_out = (_signed) ? _mem__signed_out: 
                                (_unsigned)? _mem__unsigned_out:
@@ -69,10 +68,10 @@ module memory (
 
 
   /* 写入数据 */
-  wire [`XLEN-1:0] _mem_write = (_ls8byte) ? {56'b0, rs2_data[7:0]} :
-                                (_ls16byte) ? {48'b0, rs2_data[15:0]}:
-                                (_ls32byte) ? {32'b0, rs2_data[31:0]}:
-                                 rs2_data;
+  wire [`XLEN-1:0] _mem_write = {{`XLEN{_ls8byte}} & {{`XLEN-8{1'b0}},rs2_data[7:0]}} |
+                                   {{`XLEN{_ls16byte}}&{{`XLEN-16{1'b0}},rs2_data[15:0]}} |
+                                   {{`XLEN{_ls32byte}}&{{`XLEN-32{1'b0}},rs2_data[31:0]}} |
+                                   {{`XLEN{_ls64byte}}&{rs2_data[`XLEN-1:0]}};
 
   /* 写数据 mask 选择,_mask:初步选择 _wmask:最终选择 */
   wire [7:0] _mask = ({8{_ls8byte}}&8'b0000_0001) |

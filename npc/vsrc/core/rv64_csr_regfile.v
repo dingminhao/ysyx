@@ -1,14 +1,14 @@
 `include "./../sysconfig.v"
 
 module rv64_csr_regfile (
-    input clk,
-    input rst,
+    input clk, // 时钟
+    input rst, // 复位
     /* 单独引出寄存器(写) */
-    input wire [`XLEN-1:0] csr_mstatus_i,
-    input wire [`XLEN-1:0] csr_mepc_i,
-    input wire [`XLEN-1:0] csr_mcause_i,
-    input wire [`XLEN-1:0] csr_mtval_i,
-    input wire [`XLEN-1:0] csr_mtvec_i,
+    input wire [`XLEN-1:0] csr_mstatus_i, //状态寄存器
+    input wire [`XLEN-1:0] csr_mepc_i,    //异常pc
+    input wire [`XLEN-1:0] csr_mcause_i,  //引起异常的原因
+    input wire [`XLEN-1:0] csr_mtval_i,   // 
+    input wire [`XLEN-1:0] csr_mtvec_i,   // 异常处理入口
     input wire csr_mstatus_i_en,
     input wire csr_mepc_i_en,
     input wire csr_mcause_i_en,
@@ -22,8 +22,8 @@ module rv64_csr_regfile (
     output wire [`XLEN-1:0] csr_mtvec_o,
 
     /* 读取数据端口 */
-    input wire [`CSR_REG_ADDRWIDTH-1:0] csr_readaddr,
-    output wire [`XLEN-1:0] csr_readdata,
+    input wire [`CSR_REG_ADDRWIDTH-1:0] csr_readaddr, // 读取地址
+    output wire [`XLEN-1:0] csr_readdata, // 读取数据
     /* 写入数据端口 */
     input reg [`CSR_REG_ADDRWIDTH-1:0] csr_writeaddr,
     input write_enable,
@@ -31,7 +31,7 @@ module rv64_csr_regfile (
 );
 
   // mstatus
-  wire [`XLEN-1:0] _mstatus_d = (csr_mstatus_i_en) ? csr_mstatus_i : csr_writedata;
+  wire [`XLEN-1:0] _mstatus_d = (csr_mstatus_i_en) ? csr_mstatus_i : csr_writedata;  
   reg [`XLEN-1:0] _mstatus_q;
   reg _mstatus_en;
 

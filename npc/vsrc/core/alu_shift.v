@@ -1,4 +1,4 @@
-`include "../sysconfig.v"
+`include "./../sysconfig.v"
 
 module alu_shift (
     input shift_sra,
@@ -37,6 +37,7 @@ module alu_shift (
   );
   /* 选择掩码,64位移位和32位移位掩码不同 */
   wire [5:0] _eff_mask_shift_count = (isshift32) ? (_shifter_in2 + 6'd32) : _shifter_in2;
+  
   /* 选择符号位,32位移位需要忽略输入num的高32位 */
   wire _lastbit = (isshift32) ? _shift_num[31] : _shift_num[`XLEN-1];
 

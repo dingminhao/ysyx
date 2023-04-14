@@ -13,13 +13,13 @@ extern "C" {
 
 
     // DPI IMPORTS
-    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/fetch.v:15:32
+    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/fetch.v:20:32
     extern void get_pc(long long pc);
-    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/fetch.v:10:32
+    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/fetch.v:15:32
     extern void pmem_read(long long raddr, long long* rdata);
-    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/memory.v:95:32
+    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/memory.v:94:32
     extern void pmem_write(long long waddr, long long wdata, char wmask);
-    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/rv64reg.v:29:32
+    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/rv64reg.v:34:32
     extern void set_gpr_ptr(const svOpenArrayHandle a);
 
 #ifdef __cplusplus

@@ -350,53 +350,51 @@ void Vysyx_top___024root__traceFullSub0(Vysyx_top___024root* vlSelf, VerilatedVc
         tracep->fullQData(oldp+23,((((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___unsigned) 
                                      | (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___signed))
                                      ? ((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___signed)
-                                         ? ((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls8byte)
-                                             ? (((- (QData)((IData)(
-                                                                    (1U 
-                                                                     & (IData)(
-                                                                               (vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read 
+                                         ? (((((- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls8byte))) 
+                                               & (((- (QData)((IData)(
+                                                                      (1U 
+                                                                       & (IData)(
+                                                                                (vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read 
                                                                                 >> 7U)))))) 
-                                                 << 8U) 
-                                                | (QData)((IData)(
-                                                                  (0xffU 
-                                                                   & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))))
-                                             : ((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls16byte)
-                                                 ? 
-                                                (((- (QData)((IData)(
-                                                                     (1U 
-                                                                      & (IData)(
+                                                   << 8U) 
+                                                  | (QData)((IData)(
+                                                                    (0xffU 
+                                                                     & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))))) 
+                                              | ((- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls16byte))) 
+                                                 & (((- (QData)((IData)(
+                                                                        (1U 
+                                                                         & (IData)(
                                                                                 (vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read 
                                                                                 >> 0xfU)))))) 
-                                                  << 0x10U) 
-                                                 | (QData)((IData)(
-                                                                   (0xffffU 
-                                                                    & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))))
-                                                 : 
-                                                ((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls32byte)
-                                                  ? 
-                                                 (((QData)((IData)(
-                                                                   (- (IData)(
-                                                                              (1U 
-                                                                               & (IData)(
+                                                     << 0x10U) 
+                                                    | (QData)((IData)(
+                                                                      (0xffffU 
+                                                                       & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))))))) 
+                                             | ((- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls32byte))) 
+                                                & (((QData)((IData)(
+                                                                    (- (IData)(
+                                                                               (1U 
+                                                                                & (IData)(
                                                                                 (vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read 
                                                                                 >> 0x1fU))))))) 
-                                                   << 0x20U) 
-                                                  | (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))
-                                                  : vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))
+                                                    << 0x20U) 
+                                                   | (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))))) 
+                                            | ((- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls64byte))) 
+                                               & vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))
                                          : ((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___unsigned)
-                                             ? ((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls8byte)
-                                                 ? (QData)((IData)(
-                                                                   (0xffU 
-                                                                    & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))))
-                                                 : 
-                                                ((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls16byte)
-                                                  ? (QData)((IData)(
-                                                                    (0xffffU 
-                                                                     & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))))
-                                                  : 
-                                                 ((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls32byte)
-                                                   ? (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))
-                                                   : vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))
+                                             ? ((((
+                                                   (- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls8byte))) 
+                                                   & (QData)((IData)(
+                                                                     (0xffU 
+                                                                      & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))))) 
+                                                  | ((- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls16byte))) 
+                                                     & (QData)((IData)(
+                                                                       (0xffffU 
+                                                                        & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))))) 
+                                                 | ((- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls32byte))) 
+                                                    & (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))) 
+                                                | ((- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls64byte))) 
+                                                   & vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))
                                              : 0ULL))
                                      : vlSelf->ysyx_top__DOT__exc_out)),64);
         tracep->fullQData(oldp+25,((QData)((IData)(vlSelf->ysyx_top__DOT__u_fetch__DOT___mem_data))),64);
@@ -411,18 +409,18 @@ void Vysyx_top___024root__traceFullSub0(Vysyx_top___024root* vlSelf, VerilatedVc
         tracep->fullQData(oldp+41,(vlSelf->ysyx_top__DOT__u_execute__DOT__u_execute_csr__DOT___csr_exe_result),64);
         tracep->fullQData(oldp+43,(vlSelf->ysyx_top__DOT__exc_out),64);
         tracep->fullQData(oldp+45,(((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___signed)
-                                     ? ((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls8byte)
-                                         ? (((- (QData)((IData)(
-                                                                (1U 
-                                                                 & (IData)(
-                                                                           (vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read 
-                                                                            >> 7U)))))) 
-                                             << 8U) 
-                                            | (QData)((IData)(
-                                                              (0xffU 
-                                                               & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))))
-                                         : ((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls16byte)
-                                             ? (((- (QData)((IData)(
+                                     ? (((((- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls8byte))) 
+                                           & (((- (QData)((IData)(
+                                                                  (1U 
+                                                                   & (IData)(
+                                                                             (vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read 
+                                                                              >> 7U)))))) 
+                                               << 8U) 
+                                              | (QData)((IData)(
+                                                                (0xffU 
+                                                                 & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))))) 
+                                          | ((- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls16byte))) 
+                                             & (((- (QData)((IData)(
                                                                     (1U 
                                                                      & (IData)(
                                                                                (vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read 
@@ -430,31 +428,31 @@ void Vysyx_top___024root__traceFullSub0(Vysyx_top___024root* vlSelf, VerilatedVc
                                                  << 0x10U) 
                                                 | (QData)((IData)(
                                                                   (0xffffU 
-                                                                   & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))))
-                                             : ((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls32byte)
-                                                 ? 
-                                                (((QData)((IData)(
-                                                                  (- (IData)(
-                                                                             (1U 
-                                                                              & (IData)(
+                                                                   & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))))))) 
+                                         | ((- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls32byte))) 
+                                            & (((QData)((IData)(
+                                                                (- (IData)(
+                                                                           (1U 
+                                                                            & (IData)(
                                                                                 (vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read 
                                                                                 >> 0x1fU))))))) 
-                                                  << 0x20U) 
-                                                 | (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))
-                                                 : vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))
+                                                << 0x20U) 
+                                               | (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))))) 
+                                        | ((- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls64byte))) 
+                                           & vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))
                                      : ((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___unsigned)
-                                         ? ((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls8byte)
-                                             ? (QData)((IData)(
-                                                               (0xffU 
-                                                                & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))))
-                                             : ((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls16byte)
-                                                 ? (QData)((IData)(
+                                         ? (((((- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls8byte))) 
+                                               & (QData)((IData)(
+                                                                 (0xffU 
+                                                                  & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))))) 
+                                              | ((- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls16byte))) 
+                                                 & (QData)((IData)(
                                                                    (0xffffU 
-                                                                    & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))))
-                                                 : 
-                                                ((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls32byte)
-                                                  ? (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))
-                                                  : vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))
+                                                                    & (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))))) 
+                                             | ((- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls32byte))) 
+                                                & (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read)))) 
+                                            | ((- (QData)((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___ls64byte))) 
+                                               & vlSelf->ysyx_top__DOT__u_memory__DOT___mem_read))
                                          : 0ULL))),64);
         tracep->fullBit(oldp+47,(((IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___unsigned) 
                                   | (IData)(vlSelf->ysyx_top__DOT__u_memory__DOT___signed))));
