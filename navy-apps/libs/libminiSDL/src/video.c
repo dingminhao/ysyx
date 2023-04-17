@@ -3,16 +3,87 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include "fixedptc.h"
+/*
+typedef struct {
+	uint32_t flags; // Surface flags
+	SDL_PixelFormat *format; //Pixel format
+	int w, h; // Width and height of the surface
+	uint16_t pitch; // Length of a surface scanline in bytes
+	uint8_t *pixels;
+} SDL_Surface;
+*/
 
-void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect) {
+/*
+typedef struct {
+	int16_t x, y;
+	uint16_t w, h;
+} SDL_Rect;
+*/
+void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect) { //This performs a fast blit from the source surface to the destination surface.
   assert(dst && src);
   assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
+  
+  // dst 区域选择
+  uint16_t des_x = (dstrect == NULL) ? 0 : dstrect->x;
+  uint16_t des_y = (dstrect == NULL) ? 0 : dstrect->y;
+  uint16_t des_w = dst->w;//未使用
+  uint16_t des_h = dst->h;//未使用
+
+  // src 区域选择
+  uint16_t src_x = (srcrect == NULL) ? 0 : srcrect->x;
+  uint16_t src_y = (srcrect == NULL) ? 0 : srcrect->y;
+  uint16_t src_w = (srcrect == NULL) ? src->w : srcrect->w;
+  uint16_t src_h = (srcrect == NULL) ? src->h : srcrect->h;
+
+  uint32_t* dstbuf32 = (uint32_t*)dst->pixels;
+  uint32_t* srcbuf32 = (uint32_t*)src->pixels;
+
+  uint32_t srcoffset = src->w * src_y + src_x;
+  uint32_t dstoffset = dst->w * des_y + des_x; 
+//按行进行赋值
+  for(int i = 0; i < src_h; i++) {
+    for(int j = 0; j < src_w; j++) {
+      *((uint32_t*)dstbuf32 + dstoffset + j) = *((uint32_t*)srcbuf32 + srcoffset + j);
+    }
+    srcoffset += src->w;
+    dstoffset += dst->w;
+  }
 }
 
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
+  assert(dst);
+  int x;
+  int y;
+  int w;
+  int h;
+  if(dstrect == NULL) {
+    x = 0;
+    y = 0;
+    w = dst->w;
+    h = dst->h;
+  } else {
+    x = dstrect->x;
+    y = dstrect->y;
+    w = dstrect->w;
+    h = dstrect->h;
+  }
+  int offset =  (y * dst->w + x);
+  uint32_t* pixels32 = (uint32_t*)(dst->pixels);
+  for(int i = 0; i < h; i++) {
+    for(int j = 0; j < w; j++) {
+      *(pixels32 + offset + j) = (uint32_t)color;
+    }
+    offset += dst->w;
+  }
 }
 
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
+  assert(s);
+  if (w == 0 || w > s->w) w = s->w;
+  if (h == 0 || h > s->h) h = s->h;
+  NDL_DrawRect((uint32_t*)s->pixels, x, y, w, h);
 }
 
 // APIs below are already implemented.
@@ -27,8 +98,8 @@ static inline int maskToShift(uint32_t mask) {
     default: assert(0);
   }
 }
-
-SDL_Surface* SDL_CreateRGBSurface(uint32_t flags, int width, int height, int depth,
+// Create an empty SDL_Surface
+SDL_Surface* SDL_CreateRGBSurface(uint32_t flags, int width, int height, int depth, 
     uint32_t Rmask, uint32_t Gmask, uint32_t Bmask, uint32_t Amask) {
   assert(depth == 8 || depth == 32);
   SDL_Surface *s = malloc(sizeof(SDL_Surface));
@@ -56,11 +127,11 @@ SDL_Surface* SDL_CreateRGBSurface(uint32_t flags, int width, int height, int dep
 
   s->w = width;
   s->h = height;
-  s->pitch = width * depth / 8;
-  assert(s->pitch == width * s->format->BytesPerPixel);
+  s->pitch = width * depth / 8; //每一条线多少个字节
+  assert(s->pitch == width * s->format->BytesPerPixel); // 有什么意义吗？
 
-  if (!(flags & SDL_PREALLOC)) {
-    s->pixels = malloc(s->pitch * height);
+  if (!(flags & SDL_PREALLOC)) { // Surface使用预分配的内存  如果没有进行与分配内存则自己分配
+    s->pixels = malloc(s->pitch * height); //总的像素点字节大小
     assert(s->pixels);
   }
 
@@ -69,14 +140,14 @@ SDL_Surface* SDL_CreateRGBSurface(uint32_t flags, int width, int height, int dep
 
 SDL_Surface* SDL_CreateRGBSurfaceFrom(void *pixels, int width, int height, int depth,
     int pitch, uint32_t Rmask, uint32_t Gmask, uint32_t Bmask, uint32_t Amask) {
-  SDL_Surface *s = SDL_CreateRGBSurface(SDL_PREALLOC, width, height, depth,
+  SDL_Surface *s = SDL_CreateRGBSurface(SDL_PREALLOC, width, height, depth, //怎么样进行的预分配内存
       Rmask, Gmask, Bmask, Amask);
   assert(pitch == s->pitch);
   s->pixels = pixels;
   return s;
 }
 
-void SDL_FreeSurface(SDL_Surface *s) {
+void SDL_FreeSurface(SDL_Surface *s) { // 释放surface 空间
   if (s != NULL) {
     if (s->format != NULL) {
       if (s->format->palette != NULL) {
@@ -90,8 +161,8 @@ void SDL_FreeSurface(SDL_Surface *s) {
   }
 }
 
-SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, uint32_t flags) {
-  if (flags & SDL_HWSURFACE) NDL_OpenCanvas(&width, &height);
+SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, uint32_t flags) { // 使用指定的宽度、高度和像素位数设置视频模式。
+  if (flags & SDL_HWSURFACE) NDL_OpenCanvas(&width, &height); //在显存中创建视频表面
   return SDL_CreateRGBSurface(flags, width, height, bpp,
       DEFAULT_RMASK, DEFAULT_GMASK, DEFAULT_BMASK, DEFAULT_AMASK);
 }
@@ -116,14 +187,14 @@ void SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
     rect.y = y;
     rect.w = w;
     rect.h = h;
-    SDL_BlitSurface(src, &rect, dst, dstrect);
+    SDL_BlitSurface(src, &rect, dst, dstrect); // This performs a fast blit from the source surface to the destination surface.
   }
   else {
     assert(0);
   }
 }
 
-void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, int firstcolor, int ncolors) {
+void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, int firstcolor, int ncolors) { //Sets the colors in the palette of an 8-bit surface.
   assert(s);
   assert(s->format);
   assert(s->format->palette);
@@ -143,7 +214,7 @@ void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, int firstcolor
   }
 }
 
-static void ConvertPixelsARGB_ABGR(void *dst, void *src, int len) {
+static void ConvertPixelsARGB_ABGR(void *dst, void *src, int len) { // 将ARGB 转化为 ABGR
   int i;
   uint8_t (*pdst)[4] = dst;
   uint8_t (*psrc)[4] = src;

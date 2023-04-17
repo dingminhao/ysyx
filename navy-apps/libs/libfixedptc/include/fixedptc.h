@@ -91,9 +91,9 @@ typedef	__uint128_t fixedptud;
 #else
 #error "FIXEDPT_BITS must be equal to 32 or 64"
 #endif
-
-#ifndef FIXEDPT_WBITS
-#define FIXEDPT_WBITS	24
+//整数部分的位数
+#ifndef FIXEDPT_WBITS 
+#define FIXEDPT_WBITS	24  
 #endif
 
 #if FIXEDPT_WBITS >= FIXEDPT_BITS
@@ -151,11 +151,13 @@ static inline fixedpt fixedpt_abs(fixedpt A) {
 }
 
 static inline fixedpt fixedpt_floor(fixedpt A) {
-	return 0;
+	int a = fixedpt_toint(A);
+	fixedpt ret = fixedpt_fromint(a);
+	return ret;
 }
 
 static inline fixedpt fixedpt_ceil(fixedpt A) {
-	return 0;
+	return fixedpt_floor(A + FIXEDPT_ONE);
 }
 
 /*

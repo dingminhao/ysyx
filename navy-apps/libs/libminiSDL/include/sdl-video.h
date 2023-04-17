@@ -21,30 +21,30 @@ typedef struct {
 
 typedef union {
   struct {
-    uint8_t r, g, b, a;
+    uint8_t r, g, b, a;// Red intensity Green intensity 	Blue intensity
   };
   uint32_t val;
 } SDL_Color;
 
 typedef struct {
-	int ncolors;
-	SDL_Color *colors;
+	int ncolors; //Number of colors used in this palette
+	SDL_Color *colors;  // Pointer to SDL_Color structures that make up the palette.
 } SDL_Palette;
 
 typedef struct {
-	SDL_Palette *palette;
-	uint8_t BitsPerPixel;
-	uint8_t BytesPerPixel;
-	uint8_t Rloss, Gloss, Bloss, Aloss;
-	uint8_t Rshift, Gshift, Bshift, Ashift;
-	uint32_t Rmask, Gmask, Bmask, Amask;
+	SDL_Palette *palette; // Pointer to the palette, or NULL if the BitsPerPixel>8
+	uint8_t BitsPerPixel; // The number of bits used to represent each pixel in a surface. Usually 8, 16, 24 or 32
+	uint8_t BytesPerPixel; // The number of bytes used to represent each pixel in a surface. Usually one to four.
+	uint8_t Rloss, Gloss, Bloss, Aloss; // Precision loss of each color component (2[RGBA]loss)
+	uint8_t Rshift, Gshift, Bshift, Ashift; // Binary left shift of each color component in the pixel value
+	uint32_t Rmask, Gmask, Bmask, Amask; // 	Binary mask used to retrieve individual color values
 } SDL_PixelFormat;
 
 typedef struct {
-	uint32_t flags;
-	SDL_PixelFormat *format;
-	int w, h;
-	uint16_t pitch;
+	uint32_t flags; // Surface flags
+	SDL_PixelFormat *format; //Pixel format
+	int w, h; // Width and height of the surface
+	uint16_t pitch; // Length of a surface scanline in bytes
 	uint8_t *pixels;
 } SDL_Surface;
 
