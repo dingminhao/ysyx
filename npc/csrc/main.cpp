@@ -39,22 +39,22 @@ int main(int argc, char* argv[]) {
   c.registerCommand("sdboff", cmd_sdboff);
   c.registerCommand("sdb", cmd_sdb);
   int retCode;
-  // do {
-  //   retCode = c.readLine();
-  //   if(retCode == ret::Ok)
-  //       c.setGreeting(">");
-  //   else {
-  //     c.setGreeting("!>");
-  //   }
+  do {
+    retCode = c.readLine();
+    if(retCode == ret::Ok)
+        c.setGreeting(">");
+    else {
+      c.setGreeting("!>");
+    }
 
-  //   if(retCode == 1) {
-  //     cout << "retcode 1 error" <<endl;
-  //   }
-  //   if(retCode == 2) {
-  //     cout << "retcode 2 error" <<endl;
-  //   }
+    if(retCode == 1) {
+      cout << "retcode 1 error" <<endl;
+    }
+    if(retCode == 2) {
+      cout << "retcode 2 error" <<endl;
+    }
     
-  // } while(retCode != ret::Quit);
+  } while(retCode != ret::Quit);
   St->excute(-1);
   int hitgood = St->npcTrap();
   delete St;

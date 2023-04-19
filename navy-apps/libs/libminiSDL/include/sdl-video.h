@@ -26,6 +26,13 @@ typedef union {
   uint32_t val;
 } SDL_Color;
 
+typedef union {
+	struct {
+		uint8_t b, g, r, a;
+	};
+	uint32_t val;
+} SDL_Color2;
+
 typedef struct {
 	int ncolors; //Number of colors used in this palette
 	SDL_Color *colors;  // Pointer to SDL_Color structures that make up the palette.

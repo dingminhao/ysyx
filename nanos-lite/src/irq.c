@@ -11,7 +11,6 @@ static Context* do_event(Event e, Context* c) {
       printf("EVENT_SYSCALL happen.\n");
     #endif
     break;
-
     case EVENT_YIELD : 
     #ifdef Etrace
       printf("EVENT_YIELD happen.\n");
@@ -30,4 +29,5 @@ static Context* do_event(Event e, Context* c) {
 void init_irq(void) {
   Log("Initializing interrupt/exception handler...");
   cte_init(do_event);
+  printf("init_irq over\n");
 }

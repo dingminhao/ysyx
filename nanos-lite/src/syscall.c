@@ -2,6 +2,7 @@
 #include "syscall.h"
 #include <sys/time.h>
 #include "fs.h"
+#include "proc.h"
 //#define strace
 void do_syscall(Context *c) {
   uintptr_t a[4];
@@ -25,6 +26,8 @@ void do_syscall(Context *c) {
     #ifdef strace
       printf("SYS_exit!\n");
     #endif
+    naive_uload(NULL, "/bin/menu");
+    c->GPRx = 0;
     halt(c->GPRx);
     break;
 
@@ -79,6 +82,18 @@ void do_syscall(Context *c) {
     uint64_t us = io_read(AM_TIMER_UPTIME).us;
     tv->tv_sec = us / 1000000;
     tv->tv_usec = us % 1000000;
+    c->GPRx = 0;
+    break;
+
+
+    case SYS_execve:
+    #ifdef STRACE
+        printf("SYS_execve a1:%s,a2:%d,a3:%d\n", a[1], a[2], a[3]);
+    #endif
+    if (fs_open((char*)a[1], 0, 0) < 0) {
+      c->GPRx = -2;
+    }
+    naive_uload(NULL, (char*)a[1]);
     c->GPRx = 0;
     break;
 
