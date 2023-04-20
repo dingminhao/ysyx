@@ -32,7 +32,6 @@ uint64_t get_time() {
   return now - boot_time;
 }
 
-
 extern "C" void pmem_read(long long raddr, long long* rdata ) {
     if(raddr == 0) {
         return ;
