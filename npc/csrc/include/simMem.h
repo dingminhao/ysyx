@@ -5,6 +5,8 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <string.h>
+#include "../devices/include/device_top.h"
+
 using namespace std;
 #define PG_ALIGN __attribute((aligned(4096)))  //内存对其
 typedef uint64_t paddr_t;
@@ -26,6 +28,7 @@ private:
 public:
     SimMem();
     ~SimMem();
+    Device_top* Device;
     paddr_t getMEMBASE();
     uint8_t* guest_to_host(paddr_t paddr);
     paddr_t host_to_guest(uint8_t* haddr);

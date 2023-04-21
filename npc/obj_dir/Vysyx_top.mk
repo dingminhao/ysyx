@@ -53,6 +53,12 @@ VM_USER_LDLIBS = \
 # User .cpp files (from .cpp's on Verilator command line)
 VM_USER_CLASSES = \
 	Console \
+	device_base \
+	device_kb \
+	device_timer \
+	device_top \
+	device_uart \
+	device_vga \
 	dpic \
 	main \
 	difftest \
@@ -65,6 +71,7 @@ VM_USER_CLASSES = \
 VM_USER_DIR = \
 	/home/dmh/ysyx-workbench/npc/csrc \
 	/home/dmh/ysyx-workbench/npc/csrc/cppreadline \
+	/home/dmh/ysyx-workbench/npc/csrc/devices \
 	/home/dmh/ysyx-workbench/npc/csrc/sdb \
 
 
@@ -78,6 +85,18 @@ include $(VERILATOR_ROOT)/include/verilated.mk
 VPATH += $(VM_USER_DIR)
 
 Console.o: /home/dmh/ysyx-workbench/npc/csrc/cppreadline/Console.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+device_base.o: /home/dmh/ysyx-workbench/npc/csrc/devices/device_base.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+device_kb.o: /home/dmh/ysyx-workbench/npc/csrc/devices/device_kb.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+device_timer.o: /home/dmh/ysyx-workbench/npc/csrc/devices/device_timer.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+device_top.o: /home/dmh/ysyx-workbench/npc/csrc/devices/device_top.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+device_uart.o: /home/dmh/ysyx-workbench/npc/csrc/devices/device_uart.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+device_vga.o: /home/dmh/ysyx-workbench/npc/csrc/devices/device_vga.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 dpic.o: /home/dmh/ysyx-workbench/npc/csrc/dpic.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<

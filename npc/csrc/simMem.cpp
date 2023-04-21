@@ -16,10 +16,12 @@ const uint32_t init_img[] = {
 
 SimMem::SimMem() {
     cout << "npc内存初始化" << endl;
+    Device = new Device_top;
 }
 
 SimMem::~SimMem() {
     cout << "npc内存销毁" << endl;
+    delete Device;
 }
 /**
  * @brief 地址映射
@@ -88,7 +90,6 @@ void SimMem::host_write(void* addr, int len, word_t data) {
 word_t SimMem::pmem_read(paddr_t addr, int len) {
     word_t ret = host_read(guest_to_host(addr), len);
     return ret;
-
 }
 
 void SimMem::pmem_write(paddr_t addr, int len, word_t data) {
@@ -112,7 +113,7 @@ bool SimMem::in_pmem(paddr_t addr) {
  * @param addr 
  */
 void SimMem::out_of_bound(paddr_t addr) {
-    cout << "addr:\t" << hex << addr << "not in pmem!" << endl;
+    // cout << "addr:\t" << hex << addr << "not in pmem!" << endl;
 }
 
 word_t SimMem::paddr_read(paddr_t addr, int len) {
@@ -120,7 +121,8 @@ word_t SimMem::paddr_read(paddr_t addr, int len) {
     if(in_pmem(addr)) {
         return pmem_read(addr, len);
     }
-    // out_of_bound(addr);
+    return Device->read(addr);
+    out_of_bound(addr);
     return 0;
 }
 
@@ -130,6 +132,8 @@ void SimMem::paddr_write(paddr_t addr, int len, word_t data) {
         pmem_write(addr, len, data);
         return;
     }
+    Device->write(addr, data, len);
+    out_of_bound(addr);
     // out_of_bound(addr);
 }
 

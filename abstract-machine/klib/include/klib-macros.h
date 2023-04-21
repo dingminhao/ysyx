@@ -1,11 +1,3 @@
-/*
- * @Descripttion: 
- * @version: 
- * @Author: Minhao Ding
- * @Date: 2023-03-31 20:34:48
- * @LastEditors: Minhao Ding
- * @LastEditTime: 2023-04-10 09:58:51
- */
 #ifndef KLIB_MACROS_H__
 #define KLIB_MACROS_H__
 
