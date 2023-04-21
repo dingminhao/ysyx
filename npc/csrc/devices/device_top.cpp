@@ -114,6 +114,7 @@ Device_base* Device_top::findDevicebyaddr(paddr_t addr) {
         for(auto& reg_iter : iter->device_info) {
             start = reg_iter.low;
             end = reg_iter.high;
+            // cout << hex << start  << " " << hex << end << endl;
             if(atRange(start, end - 1, addr)) {
                 St->diff.difftest_skip_ref();
                 return iter;

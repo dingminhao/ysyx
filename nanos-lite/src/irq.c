@@ -15,8 +15,6 @@ static Context* do_event(Event e, Context* c) {
     #ifdef Etrace
       printf("EVENT_YIELD happen.\n");
     #endif 
-
-    
     break;
 
 

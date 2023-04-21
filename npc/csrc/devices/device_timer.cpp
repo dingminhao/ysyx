@@ -34,8 +34,8 @@ Device_timer::~Device_timer() {
 void Device_timer::init(string name){
     IOMap d;
     d.name = name;
-    d.low = KBD_ADDR;
-    d.high = KBD_ADDR + 8; //timer存储为8个字节
+    d.low = RTC_ADDR;
+    d.high = RTC_ADDR + 8; //timer存储为8个字节
     device_info.push_back(d); //将设备存放入该设备的存储空间
     gettimeofday(&bootime, NULL); //初始化时间
 }
