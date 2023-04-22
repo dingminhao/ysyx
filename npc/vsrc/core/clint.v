@@ -42,9 +42,11 @@ module clint (
   // step 1: save current pc 
   assign csr_mepc_clint_o = pc_i;
   assign csr_mepc_clint_o_valid = _trap_ecall;
+  
   // step 2: set the trap pc
   wire [`XLEN-1:0]_trap_pc_o = csr_mtvec_clint_i;  // TODO:now only suppot direct mode,need to add vector mode
   wire _trap_pc_valid_o = _trap_ecall;
+
   // step 3: save trap cuase to mcause
   assign csr_mcause_clint_o = 11; //TODO:now,only support ecall from mathine mode(11),need to add more
   assign csr_mcause_clint_o_valid = _trap_ecall;

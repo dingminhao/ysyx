@@ -80,16 +80,16 @@ bool Difftest::checkregs() {
 }
 
 void Difftest::difftest_step() {
-    if(is_skip_ref == true) {
+    if (is_skip_ref == true) {
         CPU_state dutregs = getDutregs();
         diff_regcpy(&dutregs, DIFFTEST_TO_REF);
         is_skip_ref = false;
         return;
     }
-    CPU_state now = getDutregs();
-    cout << hex << now.pc << endl;
+
     diff_exec(1);
-    if(!checkregs()) {
+    if (!checkregs()) {
+        /* 停止指令执行 */
         St->top_status = St->TOP_STOP;
     }
 }

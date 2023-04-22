@@ -10,14 +10,14 @@ void do_syscall(Context *c) {
   a[1] = c->GPR2;
   a[2] = c->GPR3;
   a[3] = c->GPR4;
-  //printf("GPR1:%d, GPR2:%d, GPR3:%d, GPR4:%d\n", a[0], a[1], a[2], a[3]);
+  // printf("GPR1:%d, GPR2:%d, GPR3:%d, GPR4:%d\n", a[0], a[1], a[2], a[3]);
   switch (a[0]) {
     // yield 生成指令
     case SYS_yield :
     #ifdef strace
       printf("SYS_yield\n");
     #endif
-    yield(); c->GPRx = 0; 
+    c->GPRx = 0; 
     break;
 
 

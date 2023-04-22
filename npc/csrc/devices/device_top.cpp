@@ -17,6 +17,7 @@ Device_top::~Device_top() {}
 
 word_t Device_top::read(paddr_t addr) {
     Device_base* base = findDevicebyaddr(addr);
+    // cout << "read addr: " << hex << addr << endl;
     if(base == nullptr) {
         cout << hex << addr << " is out of the device addr!" << endl;
         assert(base != nullptr);
@@ -28,6 +29,7 @@ word_t Device_top::read(paddr_t addr) {
 
 void Device_top::write(paddr_t addr, word_t data, uint32_t len) {
     assert(len >= 1 && len <= 8);
+    // cout << "write addr: " << hex << addr << " data: " << data << endl;
     Device_base* base = findDevicebyaddr(addr);
     if(base == nullptr) {
         cout << hex << addr << " is out of the device addr!" << endl;
@@ -110,6 +112,7 @@ Device_base* Device_top::findDeviceName(string name) {
 
 Device_base* Device_top::findDevicebyaddr(paddr_t addr) {
     paddr_t start, end;
+    
     for(auto& iter : device_pool) {
         for(auto& reg_iter : iter->device_info) {
             start = reg_iter.low;

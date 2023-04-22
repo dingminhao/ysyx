@@ -32,7 +32,7 @@ private:
     vector<sdb_tool> sdbToollist = {
         {.name = "difftest",.isok = false},
         {"wp",false},
-        {"wave",true},
+        {"wave",false},
         {"reg",false},
         {"itrace",false},
         {"mtrace",false},

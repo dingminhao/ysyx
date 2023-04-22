@@ -36,26 +36,23 @@ extern "C" void pmem_read(long long raddr, long long* rdata ) {
     if(raddr == 0) {
         return ;
     }
-    if((uint64_t)raddr == 0xa0000048) {
-        *rdata = get_time();
-    } else *rdata = St->mem->paddr_read(raddr, 8);
+    *rdata = St->mem->paddr_read(raddr, 8);
 }
 
 extern "C" void pmem_write(long long waddr, long long wdata, char wmask) {
-    // 总是往地址为`waddr & ~0x7ull`的8字节按写掩码`wmask`写入`wdata`
-    // `wmask`中每比特表示`wdata`中1个字节的掩码,
-    if((uint64_t)waddr == 0xa00003f8) {
-        putchar((char)wdata);
-    } else {
-        uint32_t temp = (uint8_t)wmask;
-        switch (temp) {
-        case 1:   St->mem->paddr_write(waddr, 1, wdata); break; // 0000_0001, 1byte.
-        case 3:   St->mem->paddr_write(waddr, 2, wdata); break; // 0000_0011, 2byte.
-        case 15:  St->mem->paddr_write(waddr, 4, wdata); break; // 0000_1111, 4byte.
-        case 255: St->mem->paddr_write(waddr, 8, wdata);  break; // 1111_1111, 8byte.
-        default:  break;
-        }
+    if(waddr == 0) {
+        return ;
     }
+    
+    uint32_t temp = (uint8_t)wmask;
+    switch (temp) {
+    case 1:   St->mem->paddr_write(waddr, 1, wdata); break; // 0000_0001, 1byte.
+    case 3:   St->mem->paddr_write(waddr, 2, wdata); break; // 0000_0011, 2byte.
+    case 15:  St->mem->paddr_write(waddr, 4, wdata); break; // 0000_1111, 4byte.
+    case 255: St->mem->paddr_write(waddr, 8, wdata);  break; // 1111_1111, 8byte.
+    default:  break;
+    }
+    
 
 }
 
