@@ -2,8 +2,23 @@
 
 
 module dcode (
+    /* From if*/
+    input [`XLEN-1:0] inst_addr,
+    /* From regfile */
+    input [`XLEN-1:0] i_rs1_data,
+    input [`XLEN-1:0] i_rs2_data,
+    /*From csr_gpr*/
+    input [`XLEN-1:0] i_csr_data,
+
     /* 输入信号 */
     input  [         `INST_LEN-1:0] inst_data,
+
+    output [`XLEN-1:0] o_inst_addr,
+    output [`XLEN-1:0] o_rs1_data,
+    output [`XLEN-1:0] o_rs2_data,
+    output [`XLEN-1:0] o_csr_data,
+
+
     /*输出信号： */
     output [    `REG_ADDRWIDTH-1:0] rs1_idx,
     output [    `REG_ADDRWIDTH-1:0] rs2_idx,
@@ -12,8 +27,7 @@ module dcode (
     /* CSR 译码结果 */
     output [          `IMM_LEN-1:0] immCSR,
     output                          isNeedimmCSR,
-    output [`CSR_REG_ADDRWIDTH-1:0] csr_idx,
-
+    output [`CSR_REG_ADDRWIDTH-1:0] csr_idx, 
     output [`ALUOP_LEN-1:0] alu_op,  // alu 操作码
     output [`MEMOP_LEN-1:0] mem_op,  // mem 操作码
     output [`EXCOP_LEN-1:0] exc_op,  // exc 操作码
@@ -22,7 +36,16 @@ module dcode (
     /* TARP 总线 */
     output wire [`TRAP_BUS] trap_bus_o
 
+
+
+
 );
+  /*传递数据*/
+  assign o_inst_addr = inst_addr;
+  assign o_rs1_data = i_rs1_data;
+  assign o_rs2_data = i_rs2_data;
+  assign o_csr_data = i_csr_data;
+
 
   wire [`INST_LEN-1:0] _inst = inst_data;
   /* 指令分解 */

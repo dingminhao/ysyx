@@ -2,18 +2,29 @@
 module memory (
     input                      clk,
     input                      rst,
-    input [         `XLEN-1:0] pc,
+
+    input [`XLEN_BUS] i_pc,
+    input [`XLEN_BUS] i_inst_data,
+
+    /*from ex*/
     input [`REG_ADDRWIDTH-1:0] rd_idx,
     input [         `XLEN-1:0] rs1_data,
     input [         `XLEN-1:0] rs2_data,
     input [      `IMM_LEN-1:0] imm_data,
     input [    `MEMOP_LEN-1:0] mem_op,    // 访存操作码
-
     input [`XLEN-1:0] exc_in,
 
+    /*to wb*/
+    output [`XLEN-1:0] o_pc,
+    output [`XLEN-1:0] o_inst_data,
+
+    /*native*/
     output [`XLEN-1:0] mem_out,
     output             isloadEnable  //读数据使能
 );
+  
+
+
   wire _memop_none = (mem_op == `MEMOP_NONE);
   wire _memop_lb = (mem_op == `MEMOP_LB);
   wire _memop_lbu = (mem_op == `MEMOP_LBU);

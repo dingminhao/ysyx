@@ -6,6 +6,16 @@
 `define REG_ADDRWIDTH 5     //寄存器地址宽度
 `define PC_RESET_ADDR `XLEN'h0000000080000000
 
+
+/*NOP*/
+`define INST_NOP 32'h00000013
+
+
+
+
+
+
+
 /* exc 操作码 */
 `define EXCOP_LEN 5
 

@@ -110,17 +110,13 @@ size_t fs_read(int fd, void* buf, size_t len) {
   size_t disk_offset = file_table[fd].disk_offset;
   size_t file_size = file_table[fd].size;
   size_t open_offset = file_table[fd].open_offset;
-  // devices
   if (fd < FD_NUM) {
     return file_table[fd].read(buf, 0, len);
   }
-  // ramdisk
   else {
 
     size_t read_len = len;
-    // 若读取的数超出文件大小,读取到文件尾为止,此时 read_len < len
     if ((open_offset + len) > file_size) {
-      // 读取剩余大小
       read_len = file_size - open_offset + 1;
     }
 
