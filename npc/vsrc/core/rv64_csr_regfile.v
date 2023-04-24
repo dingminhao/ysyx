@@ -23,9 +23,10 @@ module rv64_csr_regfile (
 
     /* 读取数据端口 */
     input wire [`CSR_REG_ADDRWIDTH-1:0] csr_readaddr, // 读取地址
+
     output wire [`XLEN-1:0] csr_readdata, // 读取数据
     /* 写入数据端口 */
-    input reg [`CSR_REG_ADDRWIDTH-1:0] csr_writeaddr,
+    input wire [`CSR_REG_ADDRWIDTH-1:0] csr_writeaddr,
     input write_enable,
     input wire [`XLEN-1:0] csr_writedata
 );

@@ -13,11 +13,11 @@ pc ysyx_22051145_pc (
     .clk(clk),
     .rst(rst),
     .pc_op(pc_op), // from ID
-    .rs1_data(), // from regfile 
+    .rs1_data(rs1_data), // from regfile 
     .imm_data(imm_data), // from ID
-    .execute_data(), // from EX
-    .clint_pc_i(), // from clint 
-    .clint_pc_valid_i(), // from clint
+    .execute_data(exc_alu_out), // from EX
+    .clint_pc_i(clint_pc), // from clint 
+    .clint_pc_valid_i(clint_pc_valid), // from clint
     // output
     .pc_out(now_pc)
 );
@@ -76,12 +76,12 @@ decode ysyx_22051145_decode(
     
     // 自陷 指令的相关操作码  ebreak ecall mret
     .trap_bus_o(trap_bus_o) 
-)
+);
 
  /****************通用寄存器组***************/
 wire [`X_LEN] rs1_data;
 wire [`X_LEN] rs2_data;
-
+wire [`X_LEN] rd_data = wb_data;  // TODO: 需要进行赋值
 
 rv64reg ysyx_22051145_rv64reg(
     // input
@@ -93,15 +93,148 @@ rv64reg ysyx_22051145_rv64reg(
     .rd_idx(rd_idx),
     // input 是否进行写数据
     .rd_data(rd_data),
-    .wen(wen), // 写使能
+    .wen(1), // 写使能 目前置为1，rd_idx = 0 时，寄存器的值不会改变   妙到家了
     // output 读rs1 与 rs2 的数据
     .rs1_data(rs1_data),
     .rs2_data(rs2_data)
+);
+
+/*****************CSR寄存器组*********************/
+    wire [`XLEN-1:0] csr_mepc_i;
+    wire [`XLEN-1:0] csr_mcause_i;
+    wire [`XLEN-1:0] csr_mtval_i;
+    wire [`XLEN-1:0] csr_mtvec_i;
+    wire [`XLEN-1:0] csr_mstatus_i;
+    // 寄存器写使能信号
+    wire csr_mepc_i_en;
+    wire csr_mcause_i_en;
+    wire csr_mtval_i_en;
+    wire csr_mtvec_i_en;
+    wire csr_mstatus_i_en;
+    // 寄存器的信息   牵出来的目的是给 clint 做中断处理
+    wire [`XLEN-1:0] csr_mepc_o;
+    wire [`XLEN-1:0] csr_mcause_o;
+    wire [`XLEN-1:0] csr_mtval_o;
+    wire [`XLEN-1:0] csr_mtvec_o;
+    wire [`XLEN-1:0] csr_mstatus_o;
+
+    wire [`CSR_REG_ADDRWIDTH-1:0] csr_readaddr;
+    wire [`X_LEN] csr_readdata;
+    
+
+    wire [`CSR_REG_ADDRWIDTH-1:0] csr_writeaddr;  // 能不能换成wire型呢？
+    wire write_enable;
+    wire [`X_LEN] csr_writedata;
+
+rv64_csr_regfile ysyx_22051145_csr_regfile(
+    .clk(clk),
+    .rst(rst),
+    /* 单独引出寄存器 */
+    .csr_mstatus_i(csr_mstatus_i), // 状态寄存器
+    .csr_mepc_i(csr_mepc_i),       // 保存异常发生时的pc
+    .csr_mcause_i(csr_mcause_i),   // 保存异常发生时的原因
+    .csr_mtval_i(csr_mtval_i),     // 保存异常发生时的错误信息
+    .csr_mtvec_i(csr_mtvec_i),     // 保存异常发生时的中断向量表的地址
+    // 使能信号
+    .csr_mstatus_i_en(csr_mstatus_i_en),         
+    .csr_mepc_i_en(csr_mepc_i_en),
+    .csr_mcause_i_en(csr_mcause_i_en),
+    .csr_mtval_i_en(csr_mtval_i_en),
+    .csr_mtvec_i_en(csr_mtvec_i_en),
+    // 读出寄存器的值
+    .csr_mstatus_o(csr_mstatus_o),
+    .csr_mepc_o(csr_mepc_o),
+    .csr_mcause_o(csr_mcause_o),
+    .csr_mtval_o(csr_mtval_o),
+    .csr_mtvec_o(csr_mtvec_o),
+
+    .csr_readaddr(csr_readaddr), // input 读取的地址
+    .csr_readdata(csr_readdata), // output 读取的数据
+
+    .csr_writeaddr(csr_writeaddr), // input 写入的地址
+    .write_enable(write_enable),    // input 写使能
+    .csr_write_data(csr_writedata)  // input 写入的数据
+);
+
+/**********************执行模块**********************/
+
+wire [`X_LEN] exc_alu_out;
+wire [`X_LEN] exc_csr_out;
+wire exc_csr_valid;
+excute ysyx_22051145_excute(
+    .pc(now_pc),
+    .rs1_data(rs1_data),
+    .rs2_data(rs2_data),
+    .imm_data(imm_data),
+    // input csr相关指令
+    .immCSR(immCSR),
+    .isNeedimmCSR(isNeedimmCSR), //通过是否有立即数 判断指令是否是带imm的csr指令
+    .csr_idx(csr_idx),
+    // input 不同操作的操作码
+    .alu_op(alu_op),
+    .mem_op(mem_op),
+    .exc_op(exc_op),
+    .csr_op(csr_op),
+    // 自陷 指令的相关操作码  ebreak ecall mret
+    // output
+    .exc_alu_out(exc_alu_out),
+    .exc_csr_out(exc_csr_out),
+    .exc_csr_valid(exc_csr_valid)
+);
+
+
+/**********************访问内存**********************/
+wire [`X_LEN] mem_out;
+wire isloadEnable;
+
+memory ysyx_22051145_memory(
+    .clk(clk),
+    .rst(rst),
+    .pc(now_pc),
+    .rd_idx(rd_idx),
+    .rs1_data(rs1_data),
+    .rs2_data(rs2_data),
+    .imm_data(imm_data),
+    .mem_op(mem_op),
+
+    .exc_in(exc_alu_out),
+
+    .mem_out(mem_out),
+    .isloadEnable(isloadEnable)
 )
 
+/**********************写回模块**********************/
+wire [`X_LEN] wb_data;
+
+writeback ysyx_22051145_writeback(
+    .exc_data_in(exc_alu_out),
+    .mem_data_in(mem_out),
+    .isloadEnable(isloadEnable),
+    .wb_data(wb_data)
+);
 
 
 
+/*******************中断异常控制模块*****************************/
+//  通过trap_bus（异常总线）， 对 ecall ebreak mret 进行处理  实际上就是对寄存器进行处理
+
+wire [`XLEN-1:0] clint_pc;
+wire clint_pc_valid;
+
+clint ysyx_22051145_csr_clint(
+    .pc_i(now_pc),
+    .inst_data_i(now_inst_data),
+
+    .trap_bus_i(trap_bus),
+
+    .csr_mepc_clint_o_valid(csr_mepc_i_en),
+    .csr_mcause_clint_o_valid(csr_mcause_i_en),
+    .csr_mtval_clint_o_valid(csr_mtval_i_en),
+    .csr_mtvec_clint_o_valid(csr_mtvec_i_en),
+    /*输出给取指阶段*/
+    .clint_pc_o(clint_pc),
+    .clint_cause_o(clint_pc_valid)
+)
 
 
 endmodule

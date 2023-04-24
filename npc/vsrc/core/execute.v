@@ -1,7 +1,6 @@
 `include "./../sysconfig.v"
 module execute (
     input [         `XLEN-1:0] pc,
-    input [`REG_ADDRWIDTH-1:0] rd_idx,
     input [         `XLEN-1:0] rs1_data,
     input [         `XLEN-1:0] rs2_data,
     input [      `IMM_LEN-1:0] imm_data,
