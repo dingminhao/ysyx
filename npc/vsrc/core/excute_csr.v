@@ -16,6 +16,7 @@ module execute_csr (
   wire _csr_read = (csr_op_i == `CSROP_READ);
   wire _csr_none = (csr_op_i == `CSROP_NONE);
 
+  
   /* CSR 不同操作的结果 */
   wire [`XLEN-1:0] _csr_op1 = csr_data_i;
   wire [`XLEN-1:0] _csr_op2 = isNeedimmCSR_i ? imm_CSR_i : rs1_data_i;

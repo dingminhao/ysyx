@@ -1,7 +1,7 @@
 `include "./../sysconfig.v"
 
 
-module dcode (
+module decode (
     /* 输入信号 */
     input  [         `INST_LEN-1:0] inst_data,
     /*输出信号： */
