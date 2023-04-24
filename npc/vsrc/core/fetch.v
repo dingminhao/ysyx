@@ -6,6 +6,7 @@
 */
 module fetch (
     input                         rst,
+
     input wire [`XLEN-1:0]        inst_addr,
     output wire [`INST_LEN-1:0]   inst_data
 );

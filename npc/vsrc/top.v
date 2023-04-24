@@ -22,9 +22,35 @@ pc u_pc (
     .clint_pc_i(),
     .clint_pc_valid_i(),
 
-    .pc_out()
+    .pc_out(inst_addr)
 );
 /*************************** 取指阶段 *************************************/
+wire [`XLEN_BUS] inst_addr_if;
+wire [`INST_LEN-1:0] inst_data_if;
+fetch u_fetch(
+    .rst(rst),
+    .inst_addr(inst_addr_if),
+    .inst_data(inst_data_if)
+);
+
+
+/*************************** if/id 流水线缓存 *************************************/
+wire [`INST_LEN-1:0] inst_data_if_id;
+wire [`XLEN_BUS] inst_addr_if_id;
+if_id u_if_id(
+    .clk(clk),
+    .rst(rst),
+
+    .i_inst_addr(inst_addr),
+    .o_inst_addr(inst_addr_if_id)
+
+    .i_inst_data
+
+)
+
+
+
+
 
 
 
