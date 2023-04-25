@@ -40,7 +40,7 @@ private:
     vector<sdbTool_t> sdbToollist = {
         {"difftest",false},
         {"wp",false},
-        {"wave",false},
+        {"wave",true},
         {"reg",false},
         {"itrace",false},
         {"mtrace",false},

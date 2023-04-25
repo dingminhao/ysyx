@@ -16,7 +16,7 @@
 #define MEMBASE 0x80000000 
 
 //#define AUTO_RUN
-//#define TOP_TRACE
+#define TOP_TRACE
 //#define MTRACH
 
 

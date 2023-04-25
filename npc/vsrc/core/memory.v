@@ -139,16 +139,8 @@ module memory (
     end
   end
 
-
-  /* trap_bus TODO:add more*/
-  reg [`TRAP_BUS] _mem_trap_bus;
-  integer i;
-  always @(*) begin
-    for (i = 0; i < `TRAP_LEN; i = i + 1) begin
-      _mem_trap_bus[i] = trap_bus_i[i];
-    end
-  end
-  assign trap_bus_o = _mem_trap_bus;
+  
+  assign trap_bus_o = trap_bus_i;
 
 
 

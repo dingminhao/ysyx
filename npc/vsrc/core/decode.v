@@ -201,7 +201,7 @@ module dcode (
 
   // rv64 only
   wire _inst_lwu = _type_load & _func3_110;
-  wire _inst_ld = _type_load & _func3_011;
+  wire _inst_ld = _type_load & _func3_01 1;
 
   /* _type_store */
   wire _inst_sb = _type_store & _func3_000;

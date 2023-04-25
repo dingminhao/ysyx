@@ -23,7 +23,7 @@ extern "C" {
     extern void pmem_write(long long pc, long long waddr, long long wdata, char wmask);
     // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/rv64_gpr_regfile.v:38:32
     extern void set_gpr_ptr(const svOpenArrayHandle a);
-    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/memory.v:156:32
+    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/memory.v:148:32
     extern void set_nextpc(long long nextpc);
 
 #ifdef __cplusplus

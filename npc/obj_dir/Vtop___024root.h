@@ -108,7 +108,6 @@ VL_MODULE(Vtop___024root) {
         VlWide<4>/*127:0*/ top__DOT__u_execute_top__DOT__u_alu__DOT__u_alu_mul_top__DOT___mul_result;
         IData/*31:0*/ top__DOT__u_ex_mem__DOT___inst_data_ex_mem_q;
         IData/*18:0*/ top__DOT__u_ex_mem__DOT___trap_bus_ex_mem_q;
-        IData/*18:0*/ top__DOT__u_memory__DOT___mem_trap_bus;
         IData/*31:0*/ top__DOT__u_mem_wb__DOT___inst_data_mem_wb_q;
         QData/*63:0*/ top__DOT__exc_alu_data_ex;
         QData/*63:0*/ top__DOT__mem_data_mem;
