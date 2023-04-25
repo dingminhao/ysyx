@@ -35,10 +35,30 @@ module ex_mem(
     output [`XLEN-1 : 0] o_inst_data
 
     input [`XLEN-1 : 0] i_pc,
-    output [`XLEN-1 : 0] o_pc
+    output [`XLEN-1 : 0] o_pc,
 
+    input [`XLEN_BUS] i_trap,
+    output [`XLEN_BUS] o_trap,
 
-)
+    input [`CSR_REG_ADDRWIDTH-1 : 0] i_csr_addr,
+    output [`CSR_REG_ADDRWIDTH-1 : 0] o_csr_addr
+
+);
+
+    wire [`CSR_REG_ADDRWIDTH-1 : 0] _i_csr_addr = i_csr_addr;
+    reg  [`CSR_REG_ADDRWIDTH-1 : 0] _o_csr_addr;
+    regTemplate #( 
+        .WIDTH(`CSR_REG_ADDRWIDTH),
+        .RESET_VAL(`CSR_REG_ADDRWIDTH'b0)  // 重置值为 0
+    ) ex_mem_csr_addr (
+        .clk(clk),
+        .rst(rst),
+        .din(_i_csr_addr),
+        .dout(_o_csr_addr),
+        .wen(1)    // wen = 1, 使能写入 
+    );
+    assign o_csr_addr = _o_csr_addr;
+
 
     wire [`XLEN-1 : 0]_i_exc_alu_out = i_exc_alu_out;
     reg [`XLEN-1 : 0]_o_exc_alu_out;

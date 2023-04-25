@@ -15,12 +15,14 @@ module memory (
     input [`XLEN-1:0] exc_in,
 
     /*to wb*/
+    output [`XLEN_BUS] o_exc_in,
     output [`XLEN-1:0] o_pc,
     output [`XLEN-1:0] o_inst_data,
 
     /*native*/
     output [`XLEN-1:0] mem_out,
-    output             isloadEnable  //读数据使能
+    output             isloadEnable,  //读数据使能
+    output [`REG_ADDRWIDTH-1:0] o_rd_idx
 );
   
 

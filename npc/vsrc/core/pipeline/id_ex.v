@@ -9,6 +9,9 @@ module id_ex(
     input  [`REG_ADDRWIDTH-1 : 0] i_rd_idx,
     output [`REG_ADDRWIDTH-1 : 0] o_rd_idx,
 
+    input [`CSR_REG_ADDRWIDTH-1:0] i_csr_addr,
+    output [`CSR_REG_ADDRWIDTH-1:0] o_csr_addr,
+
     input [`XLEN-1 : 0] i_rs1_data,
     output [`XLEN-1 : 0] o_rs1_data,
 
@@ -46,12 +49,27 @@ module id_ex(
     input [`INST_LEN-1 : 0] i_inst_data,
     output [`INST_LEN-1 : 0] o_inst_data,
 
-    input  [`CSR_ADDRWIDTH-1 : 0] i_csr_addr,
-    output [`CSR_ADDRWIDTH-1 : 0] o_csr_addr,
+    input  [`CSR_REG_ADDRWIDTH-1 : 0] i_csr_addr,
+    output [`CSR_REG_ADDRWIDTH-1 : 0] o_csr_addr,
 
     input [`TRAP_LEN-1 : 0] i_trap_bus,
     output [`TRAP_LEN-1 : 0] o_trap_bus
-) 
+); 
+
+    wire [`CSR_REG_ADDRWIDTH-1 : 0] _i_csr_addr = i_csr_addr;
+    reg  [`CSR_REG_ADDRWIDTH-1 : 0] _o_csr_addr;
+
+    regTemplate #(
+        .WIDTH(`CSR_REG_ADDRWIDTH),
+        .RESET_VAL(`CSR_REG_ADDRWIDTH'b0)  // 重置值为 0
+    ) id_ex_csr_addr (
+        .clk(clk),
+        .rst(rst),
+        .din(_i_csr_addr),
+        .dout(_o_csr_addr),
+        .wen(1)    // wen = 1, 使能写入 
+    );
+    assign o_csr_addr = _o_csr_addr;
 
     wire [`XLEN-1 : 0] _i_pc = i_pc;
     reg  [`XLEN-1 : 0] _o_pc;
@@ -228,11 +246,11 @@ module id_ex(
 
 
 
-    wire [`CSR_ADDRWIDTH-1 : 0] _i_csr_addr = i_csr_addr;
-    reg  [`CSR_ADDRWIDTH-1 : 0] _o_csr_addr;
+    wire [`CSR_REG_ADDRWIDTH-1 : 0] _i_csr_addr = i_csr_addr;
+    reg  [`CSR_REG_ADDRWIDTH-1 : 0] _o_csr_addr;
         regTemplate #(
-            .WIDTH(`CSR_ADDRWIDTH),
-            .RESET_VAL(`CSR_ADDRWIDTH'b0)  // 重置值为 0
+            .WIDTH(`CSR_REG_ADDRWIDTH),
+            .RESET_VAL(`CSR_REG_ADDRWIDTH'b0)  // 重置值为 0
         ) id_ex_csr_addr (
             .clk(clk),
             .rst(rst),

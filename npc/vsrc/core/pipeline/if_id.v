@@ -11,7 +11,7 @@ module if_id(
     input     [`INST_LEN - 1 : 0] i_inst_data,
     output    [`INST_LEN - 1 : 0] o_inst_data
 
-)
+);
     wire [`XLEN - 1 : 0] _i_inst_addr = i_inst_addr;
     reg  [`XLEN - 1 : 0] _o_inst_addr;
 

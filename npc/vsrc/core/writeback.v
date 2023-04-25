@@ -1,24 +1,14 @@
-`include "sysconfig.v"
+`include "./../sysconfig.v"
 module writeback (
-
-    input                 clk,
-    input                 rst,
-    /* from MEM/WB */
-    input [    `XLEN_BUS] pc_wb_i,
-    input [`INST_LEN-1:0] inst_data_wb_i
+    /* 通用寄存器组 */
+    input  [`XLEN-1:0] exc_data_in,   //执行阶段的数据
+    input  [`XLEN-1:0] mem_data_in,   //访存阶段的数据
+    input              isloadEnable,  //是否是访存阶段的数据
+    output [`XLEN-1:0] wb_data
 );
 
+  assign wb_data = (isloadEnable) ? mem_data_in : exc_data_in;
 
-  wire _commit_valid = (pc_wb_i != `XLEN'b0) && (inst_data_wb_i != `INST_NOP);
-
-  import "DPI-C" function void inst_commit(
-    input longint pc,
-    input int inst,
-    input bit commit_valid
-  );
-
-  always @(posedge clk) begin
-    // 延时一个周期，让寄存器写入有效
-    inst_commit(pc_wb_i, inst_data_wb_i, _commit_valid);
-  end
+  // //TODO:csr 寄存器写回还需考虑  
+  // assign wb_csr_data = csr_data_in;
 endmodule

@@ -23,6 +23,8 @@ module execute (
     // 过渡参量
     input [`INST_LEN-1:0] inst_data,
     output [`XLEN_BUS] o_pc,
+    input [`TRAP_BUS] i_trap,
+    output [`TRAP_BUS] o_trap,
     output [`INST_LEN-1:0] o_inst_data,
     output [`REG_ADDRWIDTH-1:0] o_rd_idx,
     output [`XLEN_BUS] o_rs1_data,
