@@ -1,47 +1,74 @@
 `include "sysconfig.v"
-module if_id(
-    input                         clk,
-    input                         rst,
 
-    /*需要传递给 ID的数据*/
-    input     [`XlEN - 1 : 0]     i_inst_addr,
-    output    [`XLEN - 1 : 0]     o_inst_addr,
+module if_id (
+    input clk,
+    input rst,
+    input stall_valid_i,  // 保持当前数据，不接受新的数据
+    input flush_valid_i,  // 清空当前数据（nop），不接受新的数据
 
+    //指令地址
+    input wire [`XLEN_BUS] inst_addr_if_i,
+    //指令内容
+    input wire [`INST_LEN-1:0] inst_data_if_i,
+    input [`TRAP_BUS] trap_bus_if_i,
 
-    input     [`INST_LEN - 1 : 0] i_inst_data,
-    output    [`INST_LEN - 1 : 0] o_inst_data
-
-);
-    wire [`XLEN - 1 : 0] _i_inst_addr = i_inst_addr;
-    reg  [`XLEN - 1 : 0] _o_inst_addr;
-
-    regTemplate #(
-        .WIDTH(`XLEN),
-        .RESET_VAL(`XLEN'b0)  // 重置值为 0
-    ) if_id_inst_addr (
-        .clk(clk),
-        .rst(rst),
-        .din(_i_inst_addr),
-        .dout(_o_inst_addr),
-        .wen(1)    // wen = 1, 使能写入 
-    );
-
-    assign o_inst_addr = _o_inst_addr;
-
-    wire [`INST_LEN - 1 : 0] _i_inst_data = i_inst_data;
-    reg  [`INST_LEN - 1 : 0] _o_inst_data;
-
-    regTemplate #(
-        .WIDTH(`INST_LEN),
-        .RESET_VAL(`INST_NOP)  // 重置值为 0
-    ) if_id_inst_data (
-        .clk(clk),
-        .rst(rst),
-        .din(_i_inst_data),
-        .dout(_o_inst_data),
-        .wen(1)    // wen = 1, 使能写入 
-    );
     
-    assign o_inst_data = _o_inst_data;
+    //指令地址
+    output wire [`XLEN_BUS] inst_addr_if_id_o,
+    //指令内容
+    output wire [`INST_LEN-1:0] inst_data_if_id_o,
+    output [`TRAP_BUS] trap_bus_if_id_o
+);
+  // 保持时，写失效
+
+  wire reg_wen = !stall_valid_i;
+  wire _flush_valid = flush_valid_i;
+
+  /* inst_addr_if_i 寄存器 */
+  wire [`XLEN-1:0] _inst_addr_if_id_d = (_flush_valid) ? `XLEN'b0 : inst_addr_if_i;
+  reg [`XLEN-1:0] _inst_addr_if_id_q;
+  regTemplate #(
+      .WIDTH    (`XLEN),
+      .RESET_VAL(`XLEN'b0)
+  ) u_inst_addr_if_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_inst_addr_if_id_d),
+      .dout(_inst_addr_if_id_q),
+      .wen (reg_wen)
+  );
+  assign inst_addr_if_id_o = _inst_addr_if_id_q;
+
+  /* inst_data_if_i 寄存器 */
+  wire [`INST_LEN-1:0] _inst_data_if_id_d = (_flush_valid) ? `INST_NOP : inst_data_if_i;
+  reg [`INST_LEN-1:0] _inst_data_if_id_q;
+  regTemplate #(
+      .WIDTH    (`INST_LEN),
+      .RESET_VAL(`INST_NOP)
+  ) u_inst_data_if_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_inst_data_if_id_d),
+      .dout(_inst_data_if_id_q),
+      .wen (reg_wen)
+  );
+  assign inst_data_if_id_o = _inst_data_if_id_q;
+
+
+  /* trap_bus_if_i 寄存器 */
+  wire [`TRAP_BUS] _trap_bus_if_id_d = (_flush_valid) ? `TRAP_LEN'b0 : trap_bus_if_i;
+  reg [`TRAP_BUS] _trap_bus_if_id_q;
+  regTemplate #(
+      .WIDTH    (`TRAP_LEN),
+      .RESET_VAL(`TRAP_LEN'b0)
+  ) u_trap_bus_if_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_trap_bus_if_id_d),
+      .dout(_trap_bus_if_id_q),
+      .wen (reg_wen)
+  );
+  assign trap_bus_if_id_o = _trap_bus_if_id_q;
+
 
 endmodule

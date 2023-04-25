@@ -1,62 +1,77 @@
-#include <verilated.h>          
-#include <verilated_vcd_c.h>    
-#include <iostream>
-#include <fstream>
-#include "Vysyx_top.h"
-#include <Vysyx_top__Dpi.h>
-#include "verilated_dpi.h"
-#include "include/sim_top.h"
-#include "include/simMem.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <verilated.h>
+#include <Vtop.h>
+#include "verilated_vcd_c.h"
+#include "simtop.h"
 #include "cppreadline/Console.hpp"
-#include "include/sdb.h"
-using namespace std;
+#include "mysdb.h"
+#include "simMem.h"
+#include "simconf.h"
+
+
 namespace cr = CppReadline;
 using ret = cr::Console::ReturnCode;
 
-const char* nemu = "/home/dmh/ysyx-workbench/nemu/build/riscv64-nemu-interpreter-so";
+const char* nemu_so_path = "/home/dmh/ysyx-workbench/nemu/build/riscv64-nemu-interpreter-so";
+const char* img_path = " ";
 
-Sim_top* St;
+Simtop* mysim_p;
 int main(int argc, char* argv[]) {
-  const char* path = "";
-  cout << "argc:" << argc << endl;
-  path = argv[1];
 
-  St = new Sim_top;
-  St->mem->imgpath.append(path);
-  St->mem->loadImage(St->mem->imgpath.c_str());
+  /* 解析参数 获取镜像路径*/
+  for (int i = 0;i < argc;i++) {
+    printf("argv:%s\n", argv[i]);
+    if (i == 1) {
+      img_path = argv[i];
+    }
+  }
 
-  size_t imgsize = St->mem->getImgSize(St->mem->imgpath.c_str());
-  St->reset();
-  St->diff.init_difftest(nemu, imgsize, 0);
+  /* 不知道为什么将 Simtop mysim 声明为全局变量会崩溃(已有思路,全局对象的特性)*/
+  mysim_p = new Simtop;
+  /* 加载镜像 */
+  mysim_p->mem->setImagePath(img_path);
+  mysim_p->mem->loadImage();
+  mysim_p->reset();
 
+  /* 注册命令 */
   cr::Console c(">:");
   c.registerCommand("info", cmd_info);
   c.registerCommand("x", cmd_x);
   c.registerCommand("si", cmd_si);
   c.registerCommand("c", cmd_c);
+  c.registerCommand("p", cmd_p);
   c.registerCommand("help", cmd_help);
-  c.registerCommand("sdbon", cmd_sdbon);
-  c.registerCommand("sdboff", cmd_sdboff);
+  c.registerCommand("w", cmd_w);
+  c.registerCommand("d", cmd_d);
   c.registerCommand("sdb", cmd_sdb);
   int retCode;
+
+#ifdef TOP_TRACE
+  mysim_p->u_difftest.init(nemu_so_path, mysim_p->mem->getImgSize(), 0);
+  c.executeCommand("sdb on difftest");
+#endif
+
+#ifdef AUTO_RUN
+  c.executeCommand("c");
+#else
   do {
     retCode = c.readLine();
-    if(retCode == ret::Ok)
-        c.setGreeting(">");
-    else {
+    // We can also change the prompt based on last return value:
+    if (retCode == ret::Ok)
+      c.setGreeting(">");
+    else
       c.setGreeting("!>");
-    }
+  } while (retCode != ret::Quit);
+#endif
 
-    if(retCode == 1) {
-      cout << "retcode 1 error" <<endl;
-    }
-    if(retCode == 2) {
-      cout << "retcode 2 error" <<endl;
-    }
-    
-  } while(retCode != ret::Quit);
-  St->excute(-1);
-  int hitgood = St->npcTrap();
-  delete St;
+  mysim_p->excute(1);
+  bool hitgood = mysim_p->npcHitGood();
+  delete mysim_p;
   return hitgood;
 }
+
+
+
+

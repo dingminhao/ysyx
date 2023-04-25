@@ -1,3 +1,17 @@
+/***************************************************************************************
+ * Copyright (c) 2014-2022 Zihao Yu, Nanjing University
+ *
+ * NEMU is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2
+ *
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ *
+ * See the Mulan PSL v2 for more details.
+ ***************************************************************************************/
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
@@ -24,7 +38,7 @@
 #endif
 
 
-
+#include "itrace.h"
 
 using namespace llvm;
 
@@ -103,22 +117,25 @@ static void disassemble(char* str, int size, uint64_t pc, uint8_t* code, int nby
     assert((int)s.length() - skip < size);
     strcpy(str, p);
 }
-#include "../include/sim_top.h"
-#include "../include/itrace.h"
-extern Sim_top* St;
+
+#include "simtop.h"
+extern Simtop* mysim_p;
+
 Itrace::Itrace(/* args */) {
     init_disasm("riscv64-pc-linux-gnu");
     cout << "Itrace init!" << endl;
 }
+
 Itrace::~Itrace() {
 }
 
 void Itrace::llvmDis() {
+
     static char dis_str[64];
     static uint64_t pc;
     static uint64_t inst;
-    pc = St->getRegVal("pc");
-    inst = St->mem->paddr_read(pc, 4);
+    pc = mysim_p->getRegVal("pc");
+    inst = mysim_p->mem->paddr_read(pc, 4);
     disassemble(dis_str, sizeof(dis_str), pc, (uint8_t*)&inst, 4);
-    printf("PC : %08lx\t%s\n", pc, dis_str);
+    printf("pc:%08lx\t%s\n", pc, dis_str);
 }

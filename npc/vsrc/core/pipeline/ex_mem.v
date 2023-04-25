@@ -1,203 +1,257 @@
 `include "sysconfig.v"
-module ex_mem(
+
+module ex_mem (
     input clk,
     input rst,
+    input flush_valid_i,
+    input stall_valid_i,
+
+    input [             `XLEN_BUS] pc_ex_mem_i,
+    input [         `INST_LEN-1:0] inst_data_ex_mem_i,
+    input [             `XLEN_BUS] imm_data_ex_mem_i,
+    input [    `REG_ADDRWIDTH-1:0] rd_idx_ex_mem_i,
+    input [             `XLEN_BUS] rs1_data_ex_mem_i,
+    input [             `XLEN_BUS] rs2_data_ex_mem_i,
+    input [             `XLEN_BUS] alu_data_ex_mem_i,
+    input [             `XLEN_BUS] csr_writedata_ex_mem_i,   // CSR 写回数据
+    input                          csr_writevalid_ex_mem_i,  // CSR 写回使能
+    input [`CSR_REG_ADDRWIDTH-1:0] csr_addr_ex_mem_i,        // CSR 写回地址
+    input [         `PCOP_LEN-1:0] pc_op_ex_mem_i,
+    input [        `MEMOP_LEN-1:0] mem_op_ex_mem_i,
+
+    /* TARP 总线 */
+    input [`TRAP_BUS] trap_bus_ex_mem_i,
 
 
-    /*From ex output*/
-    input [`XLEN-1 : 0] i_exc_alu_out,
-    output [`XLEN-1 : 0] o_exc_alu_out,
+    output [             `XLEN_BUS] pc_ex_mem_o,
+    output [         `INST_LEN-1:0] inst_data_ex_mem_o,
+    output [             `XLEN_BUS] imm_data_ex_mem_o,
+    output [    `REG_ADDRWIDTH-1:0] rd_idx_ex_mem_o,
+    output [             `XLEN_BUS] rs1_data_ex_mem_o,
+    output [             `XLEN_BUS] rs2_data_ex_mem_o,
+    output [             `XLEN_BUS] alu_data_ex_mem_o,
+    output [             `XLEN_BUS] csr_writedata_ex_mem_o,
+    output                          csr_writevalid_ex_mem_o,
+    output [`CSR_REG_ADDRWIDTH-1:0] csr_addr_ex_mem_o,        // CSR 写回地址
+    output [         `PCOP_LEN-1:0] pc_op_ex_mem_o,
+    output [        `MEMOP_LEN-1:0] mem_op_ex_mem_o,
 
-    input [`XLEN-1 : 0] i_exc_csr_out,
-    output [`XLEN-1 : 0] o_exc_csr_out,
-
-    input i_exc_csr_valid,
-    output o_exc_csr_valid,
-
-    /*to mem*/
-    input [`REG_ADDRWIDTH-1 : 0] i_rd_idx,
-    output [`REG_ADDRWIDTH-1 : 0] o_rd_idx,
-
-    input [`XLEN-1 : 0] i_rs1_data,
-    output [`XLEN-1 : 0] o_rs1_data,
-
-    input [`XLEN-1 : 0] i_rs2_data,
-    output [`XLEN-1 : 0] o_rs2_data,
-
-    input [`IMM_LEN-1 : 0] i_imm_data,
-    output [`IMM_LEN-1 : 0] o_imm_data,
-
-    input [`MEMOP_LEN-1 : 0] i_memop,
-    output [`MEMOP_LEN-1 : 0] o_memop
-
-    /*to writeback*/
-    input [`XLEN-1 : 0] i_inst_data,
-    output [`XLEN-1 : 0] o_inst_data
-
-    input [`XLEN-1 : 0] i_pc,
-    output [`XLEN-1 : 0] o_pc,
-
-    input [`XLEN_BUS] i_trap,
-    output [`XLEN_BUS] o_trap,
-
-    input [`CSR_REG_ADDRWIDTH-1 : 0] i_csr_addr,
-    output [`CSR_REG_ADDRWIDTH-1 : 0] o_csr_addr
-
+    /* TARP 总线 */
+    output [`TRAP_BUS] trap_bus_ex_mem_o
 );
 
-    wire [`CSR_REG_ADDRWIDTH-1 : 0] _i_csr_addr = i_csr_addr;
-    reg  [`CSR_REG_ADDRWIDTH-1 : 0] _o_csr_addr;
-    regTemplate #( 
-        .WIDTH(`CSR_REG_ADDRWIDTH),
-        .RESET_VAL(`CSR_REG_ADDRWIDTH'b0)  // 重置值为 0
-    ) ex_mem_csr_addr (
-        .clk(clk),
-        .rst(rst),
-        .din(_i_csr_addr),
-        .dout(_o_csr_addr),
-        .wen(1)    // wen = 1, 使能写入 
-    );
-    assign o_csr_addr = _o_csr_addr;
+  wire reg_wen = !stall_valid_i;
+  wire _flush_valid = flush_valid_i;
 
 
-    wire [`XLEN-1 : 0]_i_exc_alu_out = i_exc_alu_out;
-    reg [`XLEN-1 : 0]_o_exc_alu_out;
-        regTemplate #(
-        .WIDTH(`XLEN)
-        .RESET_VAL(`XLEN'b0)  // 重置值为 0
-        ) ex_mem_exc_alu_out(
-        .clk(clk),
-        .rst(rst),
-        .din(_i_exc_alu_out),
-        .dout(_o_exc_alu_out)
-        .wen(1)    // wen = 1, 使能写入
-        );
-    assign o_exc_alu_out = _o_exc_alu_out;
+  /* pc 寄存器 */
+  wire [`XLEN_BUS] _pc_ex_mem_d = (_flush_valid) ? `XLEN'b0 : pc_ex_mem_i;
+  reg [`XLEN_BUS] _pc_ex_mem_q;
+  regTemplate #(
+      .WIDTH    (`XLEN),
+      .RESET_VAL(`XLEN'b0)
+  ) u_pc_ex_mem_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_pc_ex_mem_d),
+      .dout(_pc_ex_mem_q),
+      .wen (reg_wen)
+  );
+  assign pc_ex_mem_o = _pc_ex_mem_q;
 
 
-
-    wire [`XLEN-1 : 0]_i_exc_csr_out = i_exc_csr_out;
-    reg [`XLEN-1 : 0]_o_exc_csr_out;
-        regTemplate #(
-        .WIDTH(`XLEN)
-        .RESET_VAL(`XLEN'b0)  // 重置值为 0
-        ) ex_mem_exc_csr_out(
-        .clk(clk),
-        .rst(rst),
-        .din(_i_exc_csr_out),
-        .dout(_o_exc_csr_out)
-        .wen(1)    // wen = 1, 使能写入
-        );
-    assign o_exc_csr_out = _o_exc_csr_out;
-
-
-    wire _i_exc_csr_valid = i_exc_csr_valid;
-    reg _o_exc_csr_valid;
-        regTemplate #(
-        .WIDTH(1)
-        .RESET_VAL(1'b0)  // 重置值为 0
-        ) ex_mem_exc_csr_valid(
-        .clk(clk),
-        .rst(rst),
-        .din(_i_exc_csr_valid),
-        .dout(_o_exc_csr_valid)
-        .wen(1)    // wen = 1, 使能写入
-        );
-    assign o_exc_csr_valid = _o_exc_csr_valid;
+  /* inst_data 寄存器 */
+  wire [`INST_LEN-1:0] _inst_data_ex_mem_d = (_flush_valid) ? `INST_NOP : inst_data_ex_mem_i;
+  reg [`INST_LEN-1:0] _inst_data_ex_mem_q;
+  regTemplate #(
+      .WIDTH    (`INST_LEN),
+      .RESET_VAL(`INST_NOP)
+  ) u_inst_data_ex_mem_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_inst_data_ex_mem_d),
+      .dout(_inst_data_ex_mem_q),
+      .wen (reg_wen)
+  );
+  assign inst_data_ex_mem_o = _inst_data_ex_mem_q;
 
 
 
-    wire [`XLEN-1 : 0]_i_pc = i_pc;
-    reg [`XLEN-1 : 0]_o_pc;
-        regTemplate #(
-        .WIDTH(`XLEN)
-        .RESET_VAL(`XLEN'b0)  // 重置值为 0
-        ) ex_mem_pc(
-        .clk(clk),
-        .rst(rst),
-        .din(_i_pc),
-        .dout(_o_pc)
-        .wen(1)    // wen = 1, 使能写入
-        );
-    assign o_pc = _o_pc;
+
+  /* rd_idx 寄存器 */
+  wire [`REG_ADDRWIDTH-1:0] _rd_idx_ex_mem_d = (_flush_valid) ? `REG_ADDRWIDTH'b0 :rd_idx_ex_mem_i;
+  reg [`REG_ADDRWIDTH-1:0] _rd_idx_ex_mem_q;
+  regTemplate #(
+      .WIDTH    (`REG_ADDRWIDTH),
+      .RESET_VAL(`REG_ADDRWIDTH'b0)
+  ) u_rd_idx_ex_mem_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_rd_idx_ex_mem_d),
+      .dout(_rd_idx_ex_mem_q),
+      .wen (reg_wen)
+  );
+  assign rd_idx_ex_mem_o = _rd_idx_ex_mem_q;
+
+
+  /* rs1_data 寄存器 */
+  wire [`XLEN_BUS] _rs1_data_ex_mem_d = (_flush_valid) ? `XLEN'b0 : rs1_data_ex_mem_i;
+  reg [`XLEN_BUS] _rs1_data_ex_mem_q;
+  regTemplate #(
+      .WIDTH    (`XLEN),
+      .RESET_VAL(`XLEN'b0)  //TODO:默认值未设置
+  ) u_rs1_data_ex_mem_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_rs1_data_ex_mem_d),
+      .dout(_rs1_data_ex_mem_q),
+      .wen (reg_wen)
+  );
+  assign rs1_data_ex_mem_o = _rs1_data_ex_mem_q;
+
+
+  /* rs2_data 寄存器 */
+  wire [`XLEN_BUS] _rs2_data_ex_mem_d = (_flush_valid) ? `XLEN'b0 : rs2_data_ex_mem_i;
+  reg [`XLEN_BUS] _rs2_data_ex_mem_q;
+  regTemplate #(
+      .WIDTH    (`XLEN),
+      .RESET_VAL(`XLEN'b0)  //TODO:默认值未设置
+  ) u_rs2_data_ex_mem_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_rs2_data_ex_mem_d),
+      .dout(_rs2_data_ex_mem_q),
+      .wen (reg_wen)
+  );
+  assign rs2_data_ex_mem_o = _rs2_data_ex_mem_q;
+
+
+  /* imm_data 寄存器 */
+  wire [`XLEN_BUS] _imm_data_ex_mem_d = (_flush_valid) ? `XLEN'b0 : imm_data_ex_mem_i;
+  reg [`XLEN_BUS] _imm_data_ex_mem_q;
+  regTemplate #(
+      .WIDTH    (`XLEN),
+      .RESET_VAL(`XLEN'b0)  //TODO:默认值未设置
+  ) u_imm_data_ex_mem_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_imm_data_ex_mem_d),
+      .dout(_imm_data_ex_mem_q),
+      .wen (reg_wen)
+  );
+  assign imm_data_ex_mem_o = _imm_data_ex_mem_q;
+
+
+  /* alu_data 寄存器 */
+  wire [`XLEN_BUS] _alu_data_ex_mem_d = (_flush_valid) ? `XLEN'b0 : alu_data_ex_mem_i;
+  reg [`XLEN_BUS] _alu_data_ex_mem_q;
+  regTemplate #(
+      .WIDTH    (`XLEN),
+      .RESET_VAL(`XLEN'b0)
+  ) u_alu_data_ex_mem_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_alu_data_ex_mem_d),
+      .dout(_alu_data_ex_mem_q),
+      .wen (reg_wen)
+  );
+  assign alu_data_ex_mem_o = _alu_data_ex_mem_q;
+
+
+  /* csr_writedata 寄存器 */
+  wire [`XLEN_BUS] _csr_writedata_ex_mem_d = (_flush_valid) ? `XLEN'b0 : csr_writedata_ex_mem_i;
+  reg [`XLEN_BUS] _csr_writedata_ex_mem_q;
+  regTemplate #(
+      .WIDTH    (`XLEN),
+      .RESET_VAL(`XLEN'b0)  //TODO:默认值未设置
+  ) u_csr_writedata_ex_mem_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_csr_writedata_ex_mem_d),
+      .dout(_csr_writedata_ex_mem_q),
+      .wen (reg_wen)
+  );
+  assign csr_writedata_ex_mem_o = _csr_writedata_ex_mem_q;
+
+  /* csr_writevalid 寄存器 */
+  wire _csr_writevalid_ex_mem_d = (_flush_valid) ? `FALSE : csr_writevalid_ex_mem_i;
+  reg _csr_writevalid_ex_mem_q;
+  regTemplate #(
+      .WIDTH    (1),
+      .RESET_VAL(`FALSE)  //TODO:默认值未设置
+  ) u_csr_writevalid_ex_mem_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_csr_writevalid_ex_mem_d),
+      .dout(_csr_writevalid_ex_mem_q),
+      .wen (reg_wen)
+  );
+  assign csr_writevalid_ex_mem_o = _csr_writevalid_ex_mem_q;
+
+
+  /* csr_addr 寄存器 */
+  wire [`CSR_REG_ADDRWIDTH-1:0] _csr_addr_ex_mem_d = (_flush_valid) ? `CSR_REG_ADDRWIDTH'b0 :csr_addr_ex_mem_i;
+  reg [`CSR_REG_ADDRWIDTH-1:0] _csr_addr_ex_mem_q;
+  regTemplate #(
+      .WIDTH    (`CSR_REG_ADDRWIDTH),
+      .RESET_VAL(`CSR_REG_ADDRWIDTH'b0)  //TODO:默认值未设置
+  ) u_csr_addr_ex_mem_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_csr_addr_ex_mem_d),
+      .dout(_csr_addr_ex_mem_q),
+      .wen (reg_wen)
+  );
+  assign csr_addr_ex_mem_o = _csr_addr_ex_mem_q;
 
 
 
-    wire [`REG_ADDRWIDTH-1 : 0]_i_rd_idx = i_rd_idx;
-    reg [`REG_ADDRWIDTH-1 : 0]_o_rd_idx;
-        regTemplate #(
-        .WIDTH(`REG_ADDRWIDTH)
-        .RESET_VAL(`REG_ADDRWIDTH'b0)  // 重置值为 0
-        ) ex_mem_rd_idx(
-        .clk(clk),
-        .rst(rst),
-        .din(_i_rd_idx),
-        .dout(_o_rd_idx)
-        .wen(1)    // wen = 1, 使能写入
-        );
-    assign o_rd_idx = _o_rd_idx;
+  /* pc_op 寄存器 */
+  wire [`PCOP_LEN-1:0] _pc_op_ex_mem_d = (_flush_valid) ? `PCOP_NONE : pc_op_ex_mem_i;
+  reg [`PCOP_LEN-1:0] _pc_op_ex_mem_q;
+  regTemplate #(
+      .WIDTH    (`PCOP_LEN),
+      .RESET_VAL(`PCOP_NONE)  //TODO:默认值未设置
+  ) u_pc_op_ex_mem_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_pc_op_ex_mem_d),
+      .dout(_pc_op_ex_mem_q),
+      .wen (reg_wen)
+  );
+  assign pc_op_ex_mem_o = _pc_op_ex_mem_q;
 
 
-
-    wire [`XLEN-1 : 0]_i_rs1_data = i_rs1_data;
-    reg [`XLEN-1 : 0]_o_rs1_data;
-        regTemplate #(
-        .WIDTH(`XLEN)
-        .RESET_VAL(`XLEN'b0)  // 重置值为 0
-        ) ex_mem_rs1_data(
-        .clk(clk),
-        .rst(rst),
-        .din(_i_rs1_data),
-        .dout(_o_rs1_data)
-        .wen(1)    // wen = 1, 使能写入
-        );
-    assign o_rs1_data = _o_rs1_data;
-
-
-
-    wire [`XLEN-1 : 0]_i_rs2_data = i_rs2_data;
-    reg [`XLEN-1 : 0]_o_rs2_data;
-        regTemplate #(
-        .WIDTH(`XLEN)
-        .RESET_VAL(`XLEN'b0)  // 重置值为 0
-        ) ex_mem_rs2_data(
-        .clk(clk),
-        .rst(rst),
-        .din(_i_rs2_data),
-        .dout(_o_rs2_data)
-        .wen(1)    // wen = 1, 使能写入
-        );
-    assign o_rs2_data = _o_rs2_data;
+  /* mem_op 寄存器 */
+  wire [`MEMOP_LEN-1:0] _mem_op_ex_mem_d = (_flush_valid) ? `MEMOP_NONE : mem_op_ex_mem_i;
+  reg [`MEMOP_LEN-1:0] _mem_op_ex_mem_q;
+  regTemplate #(
+      .WIDTH    (`MEMOP_LEN),
+      .RESET_VAL(`MEMOP_NONE)  //TODO:默认值未设置
+  ) u_mem_op_ex_mem_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_mem_op_ex_mem_d),
+      .dout(_mem_op_ex_mem_q),
+      .wen (reg_wen)
+  );
+  assign mem_op_ex_mem_o = _mem_op_ex_mem_q;
 
 
+  /* trap_bus 寄存器 */
+  wire [`TRAP_LEN-1:0] _trap_bus_ex_mem_d = (_flush_valid) ? `TRAP_LEN'b0 : trap_bus_ex_mem_i;
+  reg [`TRAP_LEN-1:0] _trap_bus_ex_mem_q;
+  regTemplate #(
+      .WIDTH    (`TRAP_LEN),
+      .RESET_VAL(`TRAP_LEN'b0)  //TODO:默认值未设置
+  ) u_trap_bus_ex_mem_id (
+      .clk (clk),
+      .rst (rst),
+      .din (_trap_bus_ex_mem_d),
+      .dout(_trap_bus_ex_mem_q),
+      .wen (reg_wen)
+  );
+  assign trap_bus_ex_mem_o = _trap_bus_ex_mem_q;
 
-    wire [`IMM_LEN-1 : 0]_i_imm_data = i_imm_data;
-    reg [`IMM_LEN-1 : 0]_o_imm_data;
-        regTemplate #(
-        .WIDTH(`IMM_LEN)
-        .RESET_VAL(`IMM_LEN'b0)  // 重置值为 0
-        ) ex_mem_imm_data(
-        .clk(clk),
-        .rst(rst),
-        .din(_i_imm_data),
-        .dout(_o_imm_data)
-        .wen(1)    // wen = 1, 使能写入
-        );
-    assign o_imm_data = _o_imm_data;
-
-
-    wire [`MEMOP_LEN-1 : 0]_i_memop = i_memop;
-    reg [`MEMOP_LEN-1 : 0]_o_memop;
-        regTemplate #(
-        .WIDTH(`MEMOP_LEN)
-        .RESET_VAL(`MEMOP_LEN'b0)  // 重置值为 0
-        ) ex_mem_memop(
-        .clk(clk),
-        .rst(rst),
-        .din(_i_memop),
-        .dout(_o_memop)
-        .wen(1)    // wen = 1, 使能写入
-        );
-    assign o_memop = _o_memop;
 
 endmodule

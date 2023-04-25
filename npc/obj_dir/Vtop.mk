@@ -35,13 +35,19 @@ VM_PREFIX = Vtop
 VM_MODPREFIX = Vtop
 # User CFLAGS (from -CFLAGS on Verilator command line)
 VM_USER_CFLAGS = \
+	-I/home/dmh/ysyx-workbench/npc/csrc/include \
+	-I/home/dmh/ysyx-workbench/npc/csrc \
+	-I/home/dmh/ysyx-workbench/npc/csrc/devices/include \
+	-I/home/dmh/ysyx-workbench/npc/csrc/ringbuff \
+	-I/usr/include/SDL2 \
 	-I/usr/lib/llvm-14/include \
 	-std=c++14 \
 	-fno-exceptions \
 	-D_GNU_SOURCE \
 	-D__STDC_CONSTANT_MACROS \
 	-D__STDC_LIMIT_MACROS \
-	-fPIE \
+	-Ofast \
+	-fexceptions \
 
 # User LDLIBS (from -LDFLAGS on Verilator command line)
 VM_USER_LDLIBS = \
@@ -49,22 +55,34 @@ VM_USER_LDLIBS = \
 	-ldl \
 	-lSDL2 \
 	-lLLVM-14 \
+	-flto \
+	-fuse-ld=gold \
 
 # User .cpp files (from .cpp's on Verilator command line)
 VM_USER_CLASSES = \
 	Console \
-	dpic \
+	deviceManager \
+	devicebase \
+	devicekb \
+	devicetimer \
+	deviceuart \
+	devicevga \
 	main \
+	mydpic \
 	difftest \
+	expr \
+	exprinternal \
 	itrace \
-	sdb \
+	mysdb \
+	watchpoint \
 	simMem \
-	sim_top \
+	simtop \
 
 # User .cpp directories (from .cpp's on Verilator command line)
 VM_USER_DIR = \
 	/home/dmh/ysyx-workbench/npc/csrc \
 	/home/dmh/ysyx-workbench/npc/csrc/cppreadline \
+	/home/dmh/ysyx-workbench/npc/csrc/devices \
 	/home/dmh/ysyx-workbench/npc/csrc/sdb \
 
 
@@ -79,19 +97,37 @@ VPATH += $(VM_USER_DIR)
 
 Console.o: /home/dmh/ysyx-workbench/npc/csrc/cppreadline/Console.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
-dpic.o: /home/dmh/ysyx-workbench/npc/csrc/dpic.cpp
+deviceManager.o: /home/dmh/ysyx-workbench/npc/csrc/devices/deviceManager.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+devicebase.o: /home/dmh/ysyx-workbench/npc/csrc/devices/devicebase.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+devicekb.o: /home/dmh/ysyx-workbench/npc/csrc/devices/devicekb.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+devicetimer.o: /home/dmh/ysyx-workbench/npc/csrc/devices/devicetimer.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+deviceuart.o: /home/dmh/ysyx-workbench/npc/csrc/devices/deviceuart.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+devicevga.o: /home/dmh/ysyx-workbench/npc/csrc/devices/devicevga.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 main.o: /home/dmh/ysyx-workbench/npc/csrc/main.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+mydpic.o: /home/dmh/ysyx-workbench/npc/csrc/mydpic.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 difftest.o: /home/dmh/ysyx-workbench/npc/csrc/sdb/difftest.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+expr.o: /home/dmh/ysyx-workbench/npc/csrc/sdb/expr.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+exprinternal.o: /home/dmh/ysyx-workbench/npc/csrc/sdb/exprinternal.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 itrace.o: /home/dmh/ysyx-workbench/npc/csrc/sdb/itrace.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
-sdb.o: /home/dmh/ysyx-workbench/npc/csrc/sdb/sdb.cpp
+mysdb.o: /home/dmh/ysyx-workbench/npc/csrc/sdb/mysdb.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+watchpoint.o: /home/dmh/ysyx-workbench/npc/csrc/sdb/watchpoint.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 simMem.o: /home/dmh/ysyx-workbench/npc/csrc/simMem.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
-sim_top.o: /home/dmh/ysyx-workbench/npc/csrc/sim_top.cpp
+simtop.o: /home/dmh/ysyx-workbench/npc/csrc/simtop.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 
 ### Link rules... (from --exe)

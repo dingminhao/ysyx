@@ -1,12 +1,23 @@
 `include "./../sysconfig.v"
-module alu (
+module alu_top (
     /* ALU 端口 */
     input [`XLEN-1:0] alu_a_i,
     input [`XLEN-1:0] alu_b_i,
     input [`ALUOP_LEN-1:0] alu_op_i,
-    output [`XLEN-1:0] alu_out,
+    output [`XLEN-1:0] alu_out_o,
     //比较指令输出
-    output compare_out
+    output compare_out_o
+
+    /* 测试用 */
+    // output [`XLEN-1:0] sra_out,
+    // output [`XLEN-1:0] srl_out,
+    // output [`XLEN-1:0] sll_out
+    // /* 标志位 */
+    // output OF,
+    // output ZF,
+    // output SLT,
+    // output CF,
+    // output SF,
 
 );
 
@@ -54,11 +65,10 @@ module alu (
 
   /*********************************加法-减法-比较器实现*************************************/
 
-  wire _isCMP =   _aluop_slt | _aluop_bgeu |       //比较类运算
+  wire _isCMP =   _aluop_slt | _aluop_bgeu |
                   _aluop_sltu |_aluop_beq |
                   _aluop_bne |_aluop_blt  |
                   _aluop_bge|_aluop_bltu  ;
-
   /* 如果是减法、比较操作则进行减法 */
   wire _isSUBop = _aluop_sub | _isCMP;
   /* 进位 */
@@ -68,7 +78,7 @@ module alu (
   wire [`XLEN:0] _alu_b = {{1{alu_b_i[`XLEN-1]}}, alu_b_i} ^ {65{_isSUBop}};  //异或实现取反
   wire [`XLEN:0] _add_out;
   /* 加法器 */
-  assign _add_out = _alu_a + _alu_b + _cin;                //取反加1
+  assign _add_out = _alu_a + _alu_b + _cin;
 
   /* 标志位生成  具体看https://blog.csdn.net/mariodf/article/details/125334271*/
   //通过真值表得到,最高位进位,用于计算 CF 标志位
@@ -123,13 +133,13 @@ module alu (
   wire [`XLEN-1:0] _shift_out;  //移位结果
 
   alu_shift u_alu_shift (
-      .shift_sra  (_shift_sra),
-      .shift_srl  (_shift_srl),
-      .shift_sll  (_shift_sll),
-      .isshift32  (_isshift32),
-      .shift_num  (_shift_num),
-      .shift_count(_shift_count),
-      .shift_out  (_shift_out)
+      .shift_sra_i(_shift_sra),
+      .shift_srl_i(_shift_srl),
+      .shift_sll_i(_shift_sll),
+      .shift32_valid_i(_isshift32),
+      .shift_num_i(_shift_num),
+      .shift_count_i(_shift_count),
+      .shift_out_o(_shift_out)
   );
 
   /***************************************逻辑运算*******************************************/
@@ -144,12 +154,14 @@ module alu (
   wire [`XLEN*2-1:0] _mul_result;
 
   alu_mul_top u_alu_mul_top (
-      .is_sr1_signed(_is_mul_sr1_signed),
-      .is_sr2_signed(_is_mul_sr2_signed),
-      .sr1_data     (alu_a_i),
-      .sr2_data     (alu_b_i),
-      .mul_result   (_mul_result)
+      .rs1_signed_valid_i(_is_mul_sr1_signed),
+      .rs2_signed_valid_i(_is_mul_sr2_signed),
+      .rs1_data_i        (alu_a_i),
+      .rs2_data_i        (alu_b_i),
+      .mul_out_o         (_mul_result)
   );
+
+
 
   /* 不同乘法指令的结果 */
   wire [`XLEN-1:0] _inst_mul_result = _mul_result[`XLEN-1:0];
@@ -166,13 +178,16 @@ module alu (
 
   /* 暂存结果 */
   wire [`XLEN-1:0] _div_result, _rem_result;
+
   alu_div_top u_alu_div_top (
-      .issigned  (_is_div_signed),
-      .isdivw    (_is_div32),
-      .sr1_data  (alu_a_i),
-      .sr2_data  (alu_b_i),
-      .div_result(_div_result),
-      .rem_result(_rem_result)
+      // input clk,  //为流水线准备
+      // input rst,
+      .signed_valid_i(_is_div_signed),
+      .div32_valid_i (_is_div32),
+      .sr1_data_i    (alu_a_i),
+      .sr2_data_i    (alu_b_i),
+      .div_out_o     (_div_result),
+      .rem_out_o     (_rem_result)
   );
 
   /* 不同除法指令的结果 */
@@ -193,8 +208,8 @@ module alu (
                                 ({`XLEN{_aluop_rem|_aluop_remu|_aluop_remw|_aluop_remuw}}&_inst_rem_remu_remw_remuw_ret);
 
   /* 选择最后输出 */
-  assign alu_out = (_isCMP) ? {63'b0, _compare_out} : _alu_out;
-  assign compare_out = _compare_out;
+  assign alu_out_o = (_isCMP) ? {63'b0, _compare_out} : _alu_out;
+  assign compare_out_o = _compare_out;
 
 endmodule
 

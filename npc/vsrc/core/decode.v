@@ -1,58 +1,64 @@
 `include "./../sysconfig.v"
 
 
-module decode (
-    /* From if*/
-    input [`XLEN-1:0] inst_addr,
-    /* From regfile */
-    input [`XLEN-1:0] i_rs1_data,
-    input [`XLEN-1:0] i_rs2_data,
-    /*From csr_gpr*/
-    input [`XLEN-1:0] i_csr_data,
+module dcode (
+    /* from if/id */
+    input [`XLEN_BUS] inst_addr_i,
+    input [`INST_LEN-1:0] inst_data_i,
+    input [`TRAP_BUS] trap_bus_i,
+    /* from gpr regs */
+    input [`XLEN_BUS] rs1_data_i,
+    input [`XLEN_BUS] rs2_data_i,
+    /* from csr regs */
+    input [`XLEN_BUS] csr_data_i,
+    /* from id/ex stage */
+    input [`EXCOP_LEN-1:0] id_ex_exc_op_i, // 上一条指令的类型，用于判断上一条指令是否是访存指令
+    /* from exc bypass */
+    input [`XLEN_BUS] ex_rd_data_i,
+    input [`REG_ADDRWIDTH-1:0] ex_rd_addr_i,
+    input [`CSR_REG_ADDRWIDTH-1:0] ex_csr_writeaddr_i,
+    input [`XLEN_BUS] ex_csr_writedata_i,
+    /* from mem bypass */
+    input [`XLEN_BUS] mem_rd_data_i,
+    input [`REG_ADDRWIDTH-1:0] mem_rd_addr_i,
 
-    /* 输入信号 */
-    input  [         `INST_LEN-1:0] inst_data,
 
-    output [`XLEN-1:0] o_inst_addr,
-    output [`XLEN-1:0] o_rs1_data,
-    output [`XLEN-1:0] o_rs2_data,
-    output [`XLEN-1:0] o_csr_data,
+    /*通用寄存器译码结果：to id/ex */
+    output [    `REG_ADDRWIDTH-1:0] rs1_idx_o,
+    output [    `REG_ADDRWIDTH-1:0] rs2_idx_o,
+    output [    `REG_ADDRWIDTH-1:0] rd_idx_o,
+    output [             `XLEN_BUS] rs1_data_o,
+    output [             `XLEN_BUS] rs2_data_o,
+    output [          `IMM_LEN-1:0] imm_data_o,
+    /* CSR 译码结果：to id/ex*/
+    output [          `IMM_LEN-1:0] csr_imm_o,
+    output                          csr_imm_valid_o,
+    output [`CSR_REG_ADDRWIDTH-1:0] csr_idx_o,
+    output [             `XLEN_BUS] csr_readdata_o,
+
+    output [`ALUOP_LEN-1:0] alu_op_o,  // alu 操作码
+    output [`MEMOP_LEN-1:0] mem_op_o,  // mem 操作码
+    output [`EXCOP_LEN-1:0] exc_op_o,  // exc 操作码
+    output [ `PCOP_LEN-1:0] pc_op_o,   // pc 操作码
+    output [`CSROP_LEN-1:0] csr_op_o,  // csr 操作码
 
 
-    /*输出信号： */
-    output [    `REG_ADDRWIDTH-1:0] rs1_idx,
-    output [    `REG_ADDRWIDTH-1:0] rs2_idx,
-    output [    `REG_ADDRWIDTH-1:0] rd_idx,
-    output [          `IMM_LEN-1:0] imm_data,
-    /* CSR 译码结果 */
-    output [          `IMM_LEN-1:0] immCSR,
-    output                          isNeedimmCSR,
-    output [`CSR_REG_ADDRWIDTH-1:0] csr_idx, 
-    output [`ALUOP_LEN-1:0] alu_op,  // alu 操作码
-    output [`MEMOP_LEN-1:0] mem_op,  // mem 操作码
-    output [`EXCOP_LEN-1:0] exc_op,  // exc 操作码
-    output [`PCOP_LEN-1:0] pc_op,  // pc 操作码
-    output [`CSROP_LEN-1:0] csr_op,  // csr 操作码
+    output [`XLEN_BUS] inst_addr_o,
+    output [`INST_LEN-1:0] inst_data_o,
+    // 请求暂停流水线
+    output _load_use_valid_o,
     /* TARP 总线 */
-    output wire [`TRAP_BUS] trap_bus_o,
-    // 过渡信号
-    output [`INST_LEN-1:0] o_inst_data,
-    output [`XLEN-1:0] o_inst_addr
-
-
+    output wire [`TRAP_BUS] trap_bus_o
 
 );
-  /*传递数据*/
-  assign o_inst_addr = inst_addr;
-  assign o_inst_data = inst_data;
-  assign o_inst_addr = inst_addr;
-  assign o_rs1_data = i_rs1_data;
-  assign o_rs2_data = i_rs2_data;
-  assign o_csr_data = i_csr_data;
+  assign inst_addr_o = inst_addr_i;
+  assign inst_data_o = inst_data_i;
 
 
 
-  wire [`INST_LEN-1:0] _inst = inst_data;
+
+
+  wire [`INST_LEN-1:0] _inst = inst_data_i;
   /* 指令分解 */
   wire [4:0] _rd = _inst[11:7];
   wire [2:0] _func3 = _inst[14:12];
@@ -305,10 +311,10 @@ module decode (
 
   /*获取操作数  */  //TODO:一些特殊指令没有归类ecall,ebreak
   wire _isNeed_imm = (_I_type | _S_type | _B_type | _U_type | _J_type);
-  wire _isNeed_immCSR = (_inst_csrrci | _inst_csrrsi | _inst_csrrwi);
+  wire _csr_imm_valid = (_inst_csrrci | _inst_csrrsi | _inst_csrrwi);
 
   // I 型指令中, CSR 立即数占了 rs1 的位置
-  wire _isNeed_rs1 = (_R_type | _I_type | _S_type | _B_type) & (~_isNeed_immCSR);
+  wire _isNeed_rs1 = (_R_type | _I_type | _S_type | _B_type) & (~_csr_imm_valid);
   wire _isNeed_rs2 = (_R_type | _S_type | _B_type);
   wire _isNeed_rd = (_R_type | _I_type | _U_type | _J_type);
   wire _isNeed_csr = (_inst_csrrc|_inst_csrrci|_inst_csrrs|_inst_csrrsi|_inst_csrrw|_inst_csrrwi);
@@ -327,17 +333,56 @@ module decode (
                                   ({`IMM_LEN{_J_type}}&_immJ);
 
   /* 输出指定 */
-  assign rs1_idx = _rs1_idx;
-  assign rs2_idx = _rs2_idx;
-  assign rd_idx = _rd_idx;
-  assign csr_idx = _csr_idx;
-  assign imm_data = _imm_data;
+  assign rs1_idx_o = _rs1_idx;
+  assign rs2_idx_o = _rs2_idx;
+  assign rd_idx_o = _rd_idx;
+  assign csr_idx_o = _csr_idx;
+  assign imm_data_o = _imm_data;
 
   // CSR 中的立即数 特殊处理
-  assign isNeedimmCSR = _isNeed_immCSR;
-  assign immCSR = _immCSR;
+  assign csr_imm_valid_o = _csr_imm_valid;
+  assign csr_imm_o = _immCSR;
+
+  /******************************************冲突处理***************************************************/
+  wire _pre_inst_is_load = (id_ex_exc_op_i == `EXCOP_LOAD);
+
+  // 0 号寄存器特殊处理，不然出错
+  wire _rs1_idx_not_zero = (_rs1_idx != `REG_ADDRWIDTH'b0);
+  wire _rs2_idx_not_zero = (_rs2_idx != `REG_ADDRWIDTH'b0);
+
+  // exc stage bypass
+  wire _rs1_exc_bypass_valid = (_rs1_idx == ex_rd_addr_i) && (_rs1_idx_not_zero);
+  wire _rs2_exc_bypass_valid = (_rs2_idx == ex_rd_addr_i) && (_rs2_idx_not_zero);
+  // mem stage bypass
+  wire _rs1_mem_bypass_valid = (_rs1_idx == mem_rd_addr_i) && (_rs1_idx_not_zero);
+  wire _rs2_mem_bypass_valid = (_rs2_idx == mem_rd_addr_i) && (_rs2_idx_not_zero);
+  // wb stage bypass was enabled in gpr
 
 
+  // 优先级选择权 ex > mem > wb > gpr (wb 和 gpr 的优先级在通用寄存器堆中实现)
+  wire [`XLEN_BUS] _rs1_data = (_rs1_exc_bypass_valid)?ex_rd_data_i:
+                                (_rs1_mem_bypass_valid)?mem_rd_data_i:
+                                rs1_data_i;
+  // 优先级选择权 ex > mem > wb > gpr
+  wire [`XLEN_BUS] _rs2_data = (_rs2_exc_bypass_valid)?ex_rd_data_i:
+                                (_rs2_mem_bypass_valid)?mem_rd_data_i:
+                                rs2_data_i;
+  // load-use hazard: 前一条指令为 load 类型，且下一条 rs1、rs2 为 load 指令的 rd，
+  // https://courses.cs.vt.edu/cs2506/Spring2013/Notes/L12.PipelineStalls.pdf
+  wire _load_use_data_hazard_valid = _pre_inst_is_load & (_rs1_exc_bypass_valid | _rs2_exc_bypass_valid);
+
+
+  // 输出指定
+  assign rs1_data_o = _rs1_data;
+  assign rs2_data_o = _rs2_data;
+  assign _load_use_valid_o = _load_use_data_hazard_valid;
+
+
+  /***************CSR 寄存器冲突处理*****************/
+  // TODO ,添加数据旁路
+  assign csr_readdata_o = csr_data_i;
+
+  /******************************************×××××××***************************************************/
 
   /* CSR_OP */
   wire _csr_write = _inst_csrrw | _inst_csrrwi;
@@ -351,7 +396,7 @@ module decode (
                  ({`CSROP_LEN{_csr_write}}&`CSROP_WRITE)|
                  ({`CSROP_LEN{_csr_set}}&`CSROP_SET)|
                  ({`CSROP_LEN{_csr_clear}}&`CSROP_CLEAR));
-  assign csr_op = _csr_op;
+  assign csr_op_o = _csr_op;
 
   /* ALU_OP */
   //加减和逻辑
@@ -431,7 +476,7 @@ module decode (
                                   ({`ALUOP_LEN{_alu_remw}} & `ALUOP_REMW)|
                                   ({`ALUOP_LEN{_alu_remuw}} & `ALUOP_REMUW);
 
-  assign alu_op = _alu_op;
+  assign alu_op_o = _alu_op;
 
   /* EXC_OP */
   wire [`EXCOP_LEN-1:0] _exc_op = ({`EXCOP_LEN{_type_auipc}}&`EXCOP_AUIPC) |
@@ -449,7 +494,7 @@ module decode (
                                   ({`EXCOP_LEN{_inst_ebreak}}&`EXCOP_EBREAK) | //TODO:暂时对 ebreak 特殊处理
   ({`EXCOP_LEN{_NONE_type}} & `EXCOP_NONE);
 
-  assign exc_op = _exc_op;
+  assign exc_op_o = _exc_op;
 
 
   /* MEM_OP */
@@ -464,24 +509,45 @@ module decode (
                                    ({`MEMOP_LEN{_inst_lwu}}&`MEMOP_LWU)|
                                    ({`MEMOP_LEN{_inst_ld}}&`MEMOP_LD)|
                                    ({`MEMOP_LEN{_inst_sd}}&`MEMOP_SD);
-  assign mem_op = _mem_op;
+  assign mem_op_o = _mem_op;
 
   /* PC_OP  */  //TODO:这里是优先选择器,怎么改还没想好
-  wire [`PCOP_LEN-1:0] _pc_op = (_B_type)?`PCOP_BRANCH:
-                                (_inst_jal)?`PCOP_JAL:
-                                (_inst_jalr)?`PCOP_JALR:
-                                (_inst_mret|_inst_ecall)?`PCOP_TRAP:
-                                `PCOP_INC4;
-  assign pc_op = _pc_op;
+  //TODO:mret and ecall处理  放到 clint 中
+  // wire [`PCOP_LEN-1:0] _pc_op = (_B_type)?`PCOP_BRANCH:
+  //                               (_inst_jal)?`PCOP_JAL:
+  //                               (_inst_jalr)?`PCOP_JALR:
+  //                               (_inst_mret|_inst_ecall)?`PCOP_TRAP:`PCOP_INC4;
+
+  assign pc_op_o  = `PCOP_LEN'b0;
+
+
 
 
   /* trap_bus TODO:add more*/
-  wire [`TRAP_BUS] _decode_trap_bus;
-  assign _decode_trap_bus[`TRAP_ECALL] = _inst_ecall;
-  assign _decode_trap_bus[`TRAP_EBREAK] = _inst_ebreak;
-  assign _decode_trap_bus[`TRAP_MRET] = _inst_mret;
 
+  wire _Illegal_instruction = _NONE_type;
+
+
+  reg [`TRAP_BUS] _decode_trap_bus;
+  integer i;
+  always @(*) begin
+    for (i = 0; i < `TRAP_LEN; i = i + 1) begin
+      if (i == `TRAP_MRET) begin
+        _decode_trap_bus[i] = _inst_mret;
+      end else if (i == `TRAP_EBREAK) begin
+        _decode_trap_bus[i] = _inst_ebreak;
+      end else if (i == `TRAP_ECALL) begin
+        _decode_trap_bus[i] = _inst_ecall;
+      end else if (i == `TRAP_ILLEGAL_INST) begin
+        _decode_trap_bus[i] = _Illegal_instruction;
+      end else begin
+        _decode_trap_bus[i] = trap_bus_i[i];
+      end
+    end
+  end
   assign trap_bus_o = _decode_trap_bus;
 
-
+  // assign _decode_trap_bus[`TRAP_ECALL] = _inst_ecall;
+  // assign _decode_trap_bus[`TRAP_EBREAK] = _inst_ebreak;
+  // assign _decode_trap_bus[`TRAP_MRET] = _inst_mret;
 endmodule
