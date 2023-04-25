@@ -46,7 +46,7 @@ wire [`CSR_REG_ADDRWIDTH-1 : 0] csr_idx;
 // 操作码
 wire [`ALUOP_LEN-1 : 0] alu_op;
 wire [`MEMOP_LEN-1 : 0] mem_op;
-wire [`EXCOP_LEN1-1 : 0] exc_op;
+wire [`EXCOP_LEN-1 : 0] exc_op;
 wire [`PCOP_LEN-1 : 0] pc_op;
 wire [`CSROP_LEN-1:0] csr_op;
 // 自陷 操作码
@@ -86,13 +86,12 @@ wire [`X_LEN] rd_data = wb_data;  // TODO: 需要进行赋值
 rv64reg ysyx_22051145_rv64reg(
     // input
     .clk(clk),
-    .rst(rst),
     // input 读rs1 、rs2 与 rd 的索引
     .rs1_idx(rs1_idx),
     .rs2_idx(rs2_idx),
-    .rd_idx(rd_idx),
+    .write_idx(rd_idx),
     // input 是否进行写数据
-    .rd_data(rd_data),
+    .write_data(rd_data),
     .wen(1), // 写使能 目前置为1，rd_idx = 0 时，寄存器的值不会改变   妙到家了
     // output 读rs1 与 rs2 的数据
     .rs1_data(rs1_data),
@@ -118,13 +117,13 @@ rv64reg ysyx_22051145_rv64reg(
     wire [`XLEN-1:0] csr_mtvec_o;
     wire [`XLEN-1:0] csr_mstatus_o;
 
-    wire [`CSR_REG_ADDRWIDTH-1:0] csr_readaddr;
+    wire [`CSR_REG_ADDRWIDTH-1:0] csr_readaddr = csr_idx;
     wire [`X_LEN] csr_readdata;
     
 
-    wire [`CSR_REG_ADDRWIDTH-1:0] csr_writeaddr;  // 能不能换成wire型呢？
-    wire write_enable;
-    wire [`X_LEN] csr_writedata;
+    wire [`CSR_REG_ADDRWIDTH-1:0] csr_writeaddr = csr_idx;  // 能不能换成wire型呢？
+    wire write_enable = exc_csr_valid;
+    wire [`X_LEN] csr_writedata = exc_csr_out;
 
 rv64_csr_regfile ysyx_22051145_csr_regfile(
     .clk(clk),
@@ -153,7 +152,7 @@ rv64_csr_regfile ysyx_22051145_csr_regfile(
 
     .csr_writeaddr(csr_writeaddr), // input 写入的地址
     .write_enable(write_enable),    // input 写使能
-    .csr_write_data(csr_writedata)  // input 写入的数据
+    .csr_writedata(csr_writedata)  // input 写入的数据
 );
 
 /**********************执行模块**********************/
@@ -161,15 +160,15 @@ rv64_csr_regfile ysyx_22051145_csr_regfile(
 wire [`X_LEN] exc_alu_out;
 wire [`X_LEN] exc_csr_out;
 wire exc_csr_valid;
-excute ysyx_22051145_excute(
+execute ysyx_22051145_excute(
     .pc(now_pc),
     .rs1_data(rs1_data),
     .rs2_data(rs2_data),
+    .csr_data(csr_readdata),
     .imm_data(imm_data),
     // input csr相关指令
-    .immCSR(immCSR),
+    .imm_CSR(immCSR),
     .isNeedimmCSR(isNeedimmCSR), //通过是否有立即数 判断指令是否是带imm的csr指令
-    .csr_idx(csr_idx),
     // input 不同操作的操作码
     .alu_op(alu_op),
     .mem_op(mem_op),
@@ -184,6 +183,7 @@ excute ysyx_22051145_excute(
 
 
 /**********************访问内存**********************/
+// 实现读取ram中的值，并作为mem_out输出. 写入ram值 exc_in 作为输入
 wire [`X_LEN] mem_out;
 wire isloadEnable;
 
@@ -201,9 +201,10 @@ memory ysyx_22051145_memory(
 
     .mem_out(mem_out),
     .isloadEnable(isloadEnable)
-)
+);
 
 /**********************写回模块**********************/
+// 要么是load的数据进行写回，要么是alu的数据进行写回  写回到对应的寄存器中
 wire [`X_LEN] wb_data;
 
 writeback ysyx_22051145_writeback(
@@ -225,16 +226,32 @@ clint ysyx_22051145_csr_clint(
     .pc_i(now_pc),
     .inst_data_i(now_inst_data),
 
-    .trap_bus_i(trap_bus),
+    .trap_bus_i(trap_bus_o),
 
+    /*来自于csr寄存器的读，*/
+    .csr_mstatus_clint_i(csr_mstatus_o),
+    .csr_mepc_clint_i(csr_mepc_o),
+    .csr_mcause_clint_i(csr_mcause_o),
+    .csr_mtval_clint_i(csr_mtval_o),
+    .csr_mtvec_clint_i(csr_mtvec_o),
+
+    /*来自于csr寄存器的写*/
+      .csr_mstatus_clint_o(csr_mstatus_i),
+      .csr_mepc_clint_o   (csr_mepc_i),
+      .csr_mcause_clint_o (csr_mcause_i),
+      .csr_mtval_clint_o  (csr_mtval_i),
+      .csr_mtvec_clint_o  (csr_mtvec_i),
+
+
+    .csr_mstatus_clint_o_valid(csr_mstatus_i_en),
     .csr_mepc_clint_o_valid(csr_mepc_i_en),
     .csr_mcause_clint_o_valid(csr_mcause_i_en),
     .csr_mtval_clint_o_valid(csr_mtval_i_en),
     .csr_mtvec_clint_o_valid(csr_mtvec_i_en),
     /*输出给取指阶段*/
     .clint_pc_o(clint_pc),
-    .clint_cause_o(clint_pc_valid)
-)
+    .clint_pc_valid_o (clint_pc_valid)
+);
 
 
 endmodule

@@ -30,7 +30,7 @@ private:
     };
     /*sdbToollist sdb的列表*/
     vector<sdb_tool> sdbToollist = {
-        {.name = "difftest",.isok = false},
+        {.name = "difftest",.isok = true},
         {"wp",false},
         {"wave",false},
         {"reg",false},
