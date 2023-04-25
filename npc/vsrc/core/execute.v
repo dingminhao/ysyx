@@ -18,8 +18,26 @@ module execute (
 
     output [     `XLEN-1:0] exc_alu_out,
     output [     `XLEN-1:0] exc_csr_out,
-    output exc_csr_valid
+    output exc_csr_valid,
+
+    // 过渡参量
+    input [`INST_LEN-1:0] inst_data,
+    output [`XLEN_BUS] o_pc,
+    output [`INST_LEN-1:0] o_inst_data,
+    output [`REG_ADDRWIDTH-1:0] o_rd_idx,
+    output [`XLEN_BUS] o_rs1_data,
+    output [`XLEN_BUS] o_rs2_data,
+    output [`XLEN_BUS] o_imm_data,
+    output [`MEMOP_LEN-1:0] o_memop,
 );
+// 过渡参量
+assign o_inst_data = inst_data;
+assign o_pc = pc;
+assign o_rd_idx = rd_idx;
+assign o_rs1_data = rs1_data;
+assign o_rs2_data = rs2_data;
+assign o_imm_data = imm_data;
+assign o_memop = mem_op;
 
 
   wire _excop_auipc = (exc_op == `EXCOP_AUIPC);

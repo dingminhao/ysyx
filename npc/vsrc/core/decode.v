@@ -1,7 +1,7 @@
 `include "./../sysconfig.v"
 
 
-module dcode (
+module decode (
     /* From if*/
     input [`XLEN-1:0] inst_addr,
     /* From regfile */
@@ -34,17 +34,22 @@ module dcode (
     output [`PCOP_LEN-1:0] pc_op,  // pc 操作码
     output [`CSROP_LEN-1:0] csr_op,  // csr 操作码
     /* TARP 总线 */
-    output wire [`TRAP_BUS] trap_bus_o
-
+    output wire [`TRAP_BUS] trap_bus_o,
+    // 过渡信号
+    output [`INST_LEN-1:0] o_inst_data,
+    output [`XLEN-1:0] o_inst_addr
 
 
 
 );
   /*传递数据*/
   assign o_inst_addr = inst_addr;
+  assign o_inst_data = inst_data;
+  assign o_inst_addr = inst_addr;
   assign o_rs1_data = i_rs1_data;
   assign o_rs2_data = i_rs2_data;
   assign o_csr_data = i_csr_data;
+
 
 
   wire [`INST_LEN-1:0] _inst = inst_data;

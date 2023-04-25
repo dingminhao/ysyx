@@ -6,37 +6,23 @@ module id_ex(
     input [`XLEN-1 : 0] i_pc,
     output [`XLEN-1 : 0] o_pc,
 
+    input  [`REG_ADDRWIDTH-1 : 0] i_rd_idx,
+    output [`REG_ADDRWIDTH-1 : 0] o_rd_idx,
+
     input [`XLEN-1 : 0] i_rs1_data,
     output [`XLEN-1 : 0] o_rs1_data,
 
     input [`XLEN-1 : 0] i_rs2_data,
     output [`XLEN-1 : 0] o_rs2_data,
 
-    input [`XLEN-1 : 0] i_csr_data,
-    output [`XLEN-1 : 0] o_csr_data,
-    /*MEM 中的输入*/
-    input [`INST_LEN-1 : 0] i_inst_data,
-    output [`INST_LEN-1 : 0] o_inst_data,
-
-
-    /*ID 中的输出 */
-    input  [`REG_ADDRWIDTH-1 : 0] i_rs1_idx,
-    output [`REG_ADDRWIDTH-1 : 0] o_rs1_idx,
-
-    input  [`REG_ADDRWIDTH-1 : 0] i_rs2_idx,
-    output [`REG_ADDRWIDTH-1 : 0] o_rs2_idx,
-
-    input  [`REG_ADDRWIDTH-1 : 0] i_rd_idx,
-    output [`REG_ADDRWIDTH-1 : 0] o_rd_idx,
-
     input  [`IMM_LEN-1 : 0] i_imm_data,
     output [`IMM_LEN-1 : 0] o_imm_data,
 
+    input [`XLEN-1 : 0] i_csr_data,
+    output [`XLEN-1 : 0] o_csr_data,
+
     input  [`XLEN-1 : 0] i_imm_CSR,
     output [`XLEN-1 : 0] o_imm_CSR,
-
-    input  [`CSR_ADDRWIDTH-1 : 0] i_csr_addr,
-    output [`CSR_ADDRWIDTH-1 : 0] o_csr_addr,
 
     input i_isNeedimmCSR,
     output o_isNeedimmCSR,
@@ -55,6 +41,13 @@ module id_ex(
 
     input  [`CSROP_LEN-1 : 0] i_csr_op,
     output [`CSROP_LEN-1 : 0] o_csr_op,
+
+    /*MEM 中的输入*/
+    input [`INST_LEN-1 : 0] i_inst_data,
+    output [`INST_LEN-1 : 0] o_inst_data,
+
+    input  [`CSR_ADDRWIDTH-1 : 0] i_csr_addr,
+    output [`CSR_ADDRWIDTH-1 : 0] o_csr_addr,
 
     input [`TRAP_LEN-1 : 0] i_trap_bus,
     output [`TRAP_LEN-1 : 0] o_trap_bus

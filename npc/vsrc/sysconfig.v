@@ -1,5 +1,6 @@
 
 `define XLEN 64             //cpu 位数
+`define XLEN_BUS `XLEN-1:0
 `define INST_LEN 32         //指令长度
 `define IMM_LEN 64          //立即数长度
 `define REG_NUM 32          //寄存器个数
