@@ -44,10 +44,10 @@ module clint (
 
   //stall request to PC,IF_ID, ID_EX, EX_MEM, MEM_WB
   localparam load_use_flush = 6'b000100;
-  localparam load_use_stall = 6'b000011;
-  localparam jump_flush = 6'b000110;
+  localparam load_use_stall = 6'b000011; 
+  localparam jump_flush = 6'b000110; // 让EX 与 ID  NOP
   localparam jump_stall = 6'b000000;
-  localparam trap_flush = 6'b001110;
+  localparam trap_flush = 6'b001110; // 与 jal 类似，只是多一个周期
   localparam trap_stall = 6'b000000;
   // localparam mutiple_alu_inst_flush = 6'b000011;
   // localparam mutiple_alu_inst_stall = 6'b000000;
