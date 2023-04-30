@@ -171,7 +171,7 @@ VL_INLINE_OPT void Vtop___024root___sequent__TOP__1(Vtop___024root* vlSelf) {
                          >> 1U)))) {
         vlSelf->top__DOT__u_if_id__DOT___trap_bus_if_id_q 
             = ((2U & (IData)(vlSelf->top__DOT__flush_clint))
-                ? 0U : vlSelf->top__DOT__u_fetch__DOT___if_trap_bus);
+                ? 0U : vlSelf->top__DOT__trap_bus_if);
     }
     if (vlSelf->rst) {
         vlSelf->top__DOT__u_ex_mem__DOT___pc_op_ex_mem_q = 0U;

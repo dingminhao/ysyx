@@ -97,6 +97,14 @@ bool Difftest::checkregs() {
             return false;
         }
     }
+        if(dutregs.pc != refregs.pc) {
+            cout << "pc error" << endl;
+            cout << "----------------nemu-----------------" << endl;
+            printregs(dutregs);
+            cout << "----------------dut------------------" << endl;
+            printregs(refregs);
+            return false;
+        }
     return true;
 }
 
@@ -124,15 +132,15 @@ void Difftest::printregs(CPU_state& cpu_regs) {
  * @brief 让 nemu 执行一条指令,并且进行 difftest
  *
  */
-void Difftest::difftest_step() {
+void Difftest::difftest_step() { //每执行一个指令的时候都会进行调用，当进行访存指令并且访存指令在进行访存设备的时候，会将该pc直接放入到skip_pc中 如果直接进行skip 则跳错了，需要等到该指令执行完毕后再进行skip 执行完毕的标志就是，mysim_p->commited_list.inst.front().inst_pc == skip_pc.front()
     /* 寄存器不一样 */
 
     /* 跳过当前指令的 difftest ,以 dut 为准 */
     CPU_state dutregs = getDutregs();
-
+ 
     if (!skip_pc.empty() && mysim_p->commited_list.inst.front().inst_pc == skip_pc.front()) {
         // printf("is_skip_ref\n");
-        // printf("pc:%p\n", (void*)skip_pc.front());
+        // printf("pc:%p inst_pc:%p", (void*)skip_pc.front(), (void*)mysim_p->commited_list.inst.front().inst_pc);
         diff_regcpy(&dutregs, DIFFTEST_TO_REF);
         skip_pc.pop_front();
         return;

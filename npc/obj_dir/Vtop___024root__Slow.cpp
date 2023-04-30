@@ -79,7 +79,6 @@ void Vtop___024root___settle__TOP__2(Vtop___024root* vlSelf) {
     QData/*63:0*/ top__DOT__u_memory__DOT___mem_read;
     QData/*63:0*/ top__DOT__u_memory__DOT___addr;
     // Body
-    vlSelf->top__DOT__u_fetch__DOT___if_trap_bus = 0U;
     top__DOT__u_memory__DOT___unsigned = (((5U == (IData)(vlSelf->top__DOT__u_ex_mem__DOT___mem_op_ex_mem_q)) 
                                            | (4U == (IData)(vlSelf->top__DOT__u_ex_mem__DOT___mem_op_ex_mem_q))) 
                                           | (7U == (IData)(vlSelf->top__DOT__u_ex_mem__DOT___mem_op_ex_mem_q)));
@@ -2268,6 +2267,7 @@ void Vtop___024root___ctor_var_reset(Vtop___024root* vlSelf) {
     // Body
     vlSelf->clk = 0;
     vlSelf->rst = 0;
+    vlSelf->top__DOT__trap_bus_if = 0;
     vlSelf->top__DOT__exc_alu_data_ex = 0;
     vlSelf->top__DOT__mem_data_mem = 0;
     vlSelf->top__DOT__csr_mstatus_writedata = 0;
@@ -2279,7 +2279,6 @@ void Vtop___024root___ctor_var_reset(Vtop___024root* vlSelf) {
     vlSelf->top__DOT__u_pc_reg__DOT___pc_next = 0;
     vlSelf->top__DOT__u_pc_reg__DOT___pc_current = 0;
     vlSelf->top__DOT__u_fetch__DOT___mem_data = 0;
-    vlSelf->top__DOT__u_fetch__DOT___if_trap_bus = 0;
     vlSelf->top__DOT__u_if_id__DOT___inst_addr_if_id_q = 0;
     vlSelf->top__DOT__u_if_id__DOT___inst_data_if_id_q = 0;
     vlSelf->top__DOT__u_if_id__DOT___trap_bus_if_id_q = 0;

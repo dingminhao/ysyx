@@ -7,6 +7,9 @@
 #include "simconf.h"
 
 extern Simtop* mysim_p;
+/* 为什么第一条指令要特殊处理，不特殊处理会怎么样？
+
+*/
 extern "C" void set_nextpc(long long nextpc) {
     static bool isfirst_inst = true;
     if (nextpc == 0) {

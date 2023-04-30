@@ -15,7 +15,7 @@ extern "C" {
     // DPI IMPORTS
     // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/writeback.v:30:32
     extern void inst_commit(long long pc, int inst, svBit commit_valid);
-    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/fetch.v:23:32
+    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/fetch.v:20:32
     extern void pmem_inst_read(long long raddr, long long* rdata, char rmask);
     // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/memory.v:121:32
     extern void pmem_read(long long pc, long long raddr, long long* rdata, char rmask);

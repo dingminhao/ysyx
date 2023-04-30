@@ -98,7 +98,7 @@ VL_MODULE(Vtop___024root) {
         SData/*11:0*/ top__DOT__u_id_ex__DOT___csr_idx_id_ex_q;
         SData/*11:0*/ top__DOT__u_ex_mem__DOT___csr_addr_ex_mem_q;
         SData/*11:0*/ top__DOT__u_mem_wb__DOT___csr_addr_mem_wb_q;
-        IData/*18:0*/ top__DOT__u_fetch__DOT___if_trap_bus;
+        IData/*18:0*/ top__DOT__trap_bus_if;
         IData/*31:0*/ top__DOT__u_if_id__DOT___inst_data_if_id_q;
         IData/*18:0*/ top__DOT__u_if_id__DOT___trap_bus_if_id_q;
         IData/*18:0*/ top__DOT__u_dcode__DOT___decode_trap_bus;

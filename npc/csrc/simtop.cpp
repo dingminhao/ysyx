@@ -89,10 +89,13 @@ void Simtop::stepCycle(bool val) {
      * 表示 NPC 指令已经提交，并且得到了下一条提交指令的 pc
      * 分别位 inst，nextpc 的队首
      */
+    /*
+    如果是jalr指令，那么有两条PC都会被nop，所以nextpc 
+    */
     while ((!commited_list.nextpc.empty()) && !(commited_list.inst.empty())) {
         setPC(commited_list.nextpc.front());
-        // cout << "nextpc" << hex << cpu_commit.nextpc.front()
-        //     << "commitpc" << cpu_commit.inst.front().inst_pc << endl;
+        // cout << "nextpc" << hex << commited_list.nextpc.front()
+        //     << "commitpc" << commited_list.inst.front().inst_pc << endl;
         sdbRun();
         commited_list.inst.pop_front();
         commited_list.nextpc.pop_front();

@@ -33,14 +33,14 @@ LLVM_FLAGS += -Ofast  -fexceptions
 #-lasan(内存检查)
 GCC_LIB = -lreadline \
 		  -ldl \
-		  -lSDL2 
+		  -lSDL2
 GCC_LIB += ${LLVM_LIB} -flto -fuse-ld=gold
 
 
 GCC_LDFLAGS := $(addprefix -LDFLAGS ,${GCC_LIB})
 GCC_CFLAGS :=  $(addprefix -CFLAGS ,${GCC_INC_PATH})
 GCC_CFLAGS += $(addprefix -CFLAGS ,${LLVM_FLAGS})
-GCC_FLAGS := ${GCC_CFLAGS} ${GCC_LDFLAGS}
+GCC_FLAGS := ${GCC_CFLAGS} ${GCC_LDFLAGS} -pg
 
 # run info:
 OBJ_DIR := ./obj_dir

@@ -90,11 +90,3 @@ namespace expr_namespace {
         uint64_t ret = expr_in.getResult();
         return ret;
     }
-
-    // /* 供外部调用 */
-    // uint64_t exprgetResult(char* e, bool* success) {
-    //     static Expr u_expr;
-    //     uint64_t ret = u_expr.getResult(e, success);
-    //     return ret;
-    // }
-}
