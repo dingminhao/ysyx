@@ -1,4 +1,4 @@
 NAME = klib
 SRCS = $(shell find src/ -name "*.c")
-CFLAGS += -pg
+# CFLAGS += -pg
 include $(AM_HOME)/Makefile

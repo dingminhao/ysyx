@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -30,7 +31,7 @@ int main(int argc, char* argv[]) {
 
   /* 不知道为什么将 Simtop mysim 声明为全局变量会崩溃(已有思路,全局对象的特性)*/
   mysim_p = new Simtop;
-  /* 加载镜像 */
+  /* 加载镜像,若无输入镜像，加载默认镜像 */
   mysim_p->mem->setImagePath(img_path);
   mysim_p->mem->loadImage();
   mysim_p->reset();

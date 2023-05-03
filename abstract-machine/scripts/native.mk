@@ -11,7 +11,7 @@ AM_SRCS := native/trm.c \
            native/ioe/audio.c \
            native/ioe/disk.c \
 
-CFLAGS  += -fpie -pg
+CFLAGS  += -fpie
 ASFLAGS += -fpie -pie
 
 image:

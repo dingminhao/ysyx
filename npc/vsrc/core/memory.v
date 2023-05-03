@@ -4,23 +4,35 @@ module memory (
     input rst,
 
     /* from ex/mem */
-    input  [             `XLEN_BUS] pc_i,
-    input  [         `INST_LEN-1:0] inst_data_i,
-    input  [    `REG_ADDRWIDTH-1:0] rd_idx_i,
+    input [             `XLEN_BUS] pc_i,
+    input [         `INST_LEN-1:0] inst_data_i,
+    input [    `REG_ADDRWIDTH-1:0] rd_idx_i,
     // input  [         `XLEN_BUS] rs1_data_i,
-    input  [             `XLEN_BUS] rs2_data_i,
+    input [             `XLEN_BUS] rs2_data_i,
     // input  [      `IMM_LEN-1:0] imm_data_i,
-    input  [        `MEMOP_LEN-1:0] mem_op_i,         // 访存操作码
-    input  [             `XLEN_BUS] exc_alu_data_i,
-    input  [`CSR_REG_ADDRWIDTH-1:0] csr_addr_i,
-    input  [             `XLEN_BUS] exc_csr_data_i,
-    input                           exc_csr_valid_i,
+    input [        `MEMOP_LEN-1:0] mem_op_i,        // 访存操作码
+    input [             `XLEN_BUS] exc_alu_data_i,
+    input [`CSR_REG_ADDRWIDTH-1:0] csr_addr_i,
+    input [             `XLEN_BUS] exc_csr_data_i,
+    input                          exc_csr_valid_i,
+
+    /* dcache 接口 */
+    output [`NPC_ADDR_BUS] mem_addr_o,         // 地址
+    output                 mem_addr_valid_o,   // 地址是否有效
+    output [          7:0] mem_mask_o,         // 数据掩码,读取多少位
+    output                 mem_write_valid_o,  // 1'b1,表示写;1'b0 表示读 
+    input                  mem_data_ready_i,   // 读/写 数据是否准备好
+    input  [    `XLEN_BUS] mem_rdata_i,        // 返回到读取的数据
+    output [    `XLEN_BUS] mem_wdata_o,        // 写入的数据
+
+    /* stall req */
+    output                          ram_stall_valid_mem_o,  // mem 阶段访存暂停
     // TARP 总线
     input  [             `TRAP_BUS] trap_bus_i,
     /* to mem/wb */
     output [             `XLEN_BUS] pc_o,
     output [         `INST_LEN-1:0] inst_data_o,
-    output [             `XLEN_BUS] mem_data_o,       //同时送回 id 阶段（bypass）
+    output [             `XLEN_BUS] mem_data_o,             //同时送回 id 阶段（bypass）
     //output                          load_valid_o,          
     output [    `REG_ADDRWIDTH-1:0] rd_idx_o,
     output [`CSR_REG_ADDRWIDTH-1:0] csr_addr_o,
@@ -74,7 +86,7 @@ module memory (
   //assign load_valid_o = _load_valid;
 
   /* 从内存中读取的数据 */
-  reg [`XLEN_BUS] _mem_read;
+  wire [`XLEN_BUS] _mem_read;
 
   /* 符号扩展后的结果 TODO:改成并行编码*/
   wire [     `XLEN_BUS] _mem__signed_out = (_ls8byte)?{{`XLEN-8{_mem_read[7]}},_mem_read[7:0]}:
@@ -97,7 +109,7 @@ module memory (
   // assign wb_data_o = (load_valid_i) ? mem_data_i : exc_alu_data_i;
 
 
-  /* 写入数据 */
+  /* 写入数据 TODO：有问题 */
   wire [`XLEN_BUS] _mem_write = (_ls8byte) ? {56'b0, rs2_data_i[7:0]} :
                                 (_ls16byte) ? {48'b0, rs2_data_i[15:0]}:
                                 (_ls32byte) ? {32'b0, rs2_data_i[31:0]}:
@@ -109,46 +121,58 @@ module memory (
                      ({8{_ls32byte}}&8'b0000_1111) |
                      ({8{_ls64byte}}&8'b1111_1111);
 
-  wire [7:0] _wmask = (_isstore) ? _mask : 8'b0000_0000;
-  wire [7:0] _rmask = (_isload) ? _mask : 8'b0000_0000;
+  // wire [7:0] _wmask = (_isstore) ? _mask : 8'b0000_0000;
+  // wire [7:0] _rmask = (_isload) ? _mask : 8'b0000_0000;
 
   /* 地址 */
   wire [`XLEN_BUS] _addr = (_memop_none) ? `PC_RESET_ADDR : exc_alu_data_i;
-  wire [`XLEN_BUS] _raddr = _addr;
-  wire [`XLEN_BUS] _waddr = _addr;
+  // wire [`XLEN_BUS] _raddr = _addr;
+  // wire [`XLEN_BUS] _waddr = _addr;
 
-  /***************************内存读写**************************/
-  import "DPI-C" function void pmem_read(
-    input longint pc,
-    input longint raddr,
-    output longint rdata,
-    input byte rmask
-  );
-  import "DPI-C" function void pmem_write(
-    input longint pc,
-    input longint waddr,
-    input longint wdata,
-    input byte wmask
-  );
+  /** dcache  接口 **/
+
+  assign mem_addr_o = _addr[31:0];
+  assign mem_mask_o = _mask;
+  assign _mem_read = (mem_data_ready_i) ? mem_rdata_i : `XLEN'b0;
+  assign mem_addr_valid_o = (_isload | _isstore) & (~mem_data_ready_i);
+  assign mem_write_valid_o = _isstore & (~mem_data_ready_i);
+  assign mem_wdata_o = _mem_write;
+
+
+  /* stall_req */
+
+  assign ram_stall_valid_mem_o = (_isload | _isstore) & (~mem_data_ready_i);
+
+
+
+  /* trap_bus TODO:add more*/
+  reg [`TRAP_BUS] _mem_trap_bus;
+  integer i;
   always @(*) begin
-    _mem_read = `XLEN'b0;
-    if (_isload) begin
-      pmem_read(pc_i, _raddr, _mem_read, _rmask);
-    end else if (_isstore) begin
-      pmem_write(pc_i, _waddr, _mem_write, _wmask);
+    for (i = 0; i < `TRAP_LEN; i = i + 1) begin
+      _mem_trap_bus[i] = trap_bus_i[i];
     end
   end
-
-  
-  assign trap_bus_o = trap_bus_i;
+  assign trap_bus_o = _mem_trap_bus;
 
 
 
   /************************××××××向仿真环境传递 PC *****************************/
-  import "DPI-C" function void set_nextpc(input longint nextpc);
 
+  // 用于 difftest，获取即将提交的下一条指令的 pc
+  import "DPI-C" function void set_nextpc(input longint nextpc);
   always @(posedge clk) begin
-    set_nextpc(pc_i);
+    // 避免重复提交 pc
+    if (_memop_none | mem_data_ready_i) begin
+      set_nextpc(pc_i);
+    end
+  end
+  // 用于 difftest，获取访存指令的 pc
+  import "DPI-C" function void set_mem_pc(input longint mem_pc);
+  always @(*) begin
+    if (_isstore | _isload) begin
+      set_mem_pc(pc_i);
+    end
   end
 
 endmodule

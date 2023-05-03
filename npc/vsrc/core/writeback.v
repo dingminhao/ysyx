@@ -36,10 +36,6 @@ module writeback (
   // 向仿真环境传递指令提交信息
   // 当指令有效时：pc_wb_i = 当前指令 PC ，_commit_valid = 1
   // 当指令无效时：pc_wb_i = 0 ，_commit_valid = 0；
-
-
-
-  
   always @(posedge clk) begin
     // 延时一个周期，让寄存器写入有效
     inst_commit(pc_wb_i, inst_data_wb_i, _commit_valid);

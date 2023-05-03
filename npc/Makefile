@@ -40,7 +40,7 @@ GCC_LIB += ${LLVM_LIB} -flto -fuse-ld=gold
 GCC_LDFLAGS := $(addprefix -LDFLAGS ,${GCC_LIB})
 GCC_CFLAGS :=  $(addprefix -CFLAGS ,${GCC_INC_PATH})
 GCC_CFLAGS += $(addprefix -CFLAGS ,${LLVM_FLAGS})
-GCC_FLAGS := ${GCC_CFLAGS} ${GCC_LDFLAGS} -pg
+GCC_FLAGS := ${GCC_CFLAGS} ${GCC_LDFLAGS} 
 
 # run info:
 OBJ_DIR := ./obj_dir

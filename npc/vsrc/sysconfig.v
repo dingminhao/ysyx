@@ -1,16 +1,19 @@
-
 `define XLEN 64             //cpu 位数
 `define INST_LEN 32         //指令长度
 `define IMM_LEN 64          //立即数长度
 `define REG_NUM 32          //寄存器个数
 `define REG_ADDRWIDTH 5     //寄存器地址宽度
-`define PC_RESET_ADDR `XLEN'h0000000080000000
+`define PC_RESET_ADDR `XLEN'h0000_0000_8000_0000
 
-
+`define NPC_ADDR_LEN 32
+`define NPC_ADDR_BUS `NPC_ADDR_LEN-1:0
 
 `define INST_NOP 32'h00000013           //ADDI x0, x0, 0
 `define TRUE 1'b1
 `define FALSE 1'b0
+
+
+`define MMIO_BASE 32'h0000_0000_a000_0000
 
 /* BUS */
 `define XLEN_BUS `XLEN-1:0
@@ -191,13 +194,3 @@
 `define CTRLBUS_ID_EX 2
 `define CTRLBUS_EX_MEM 3
 `define CTRLBUS_MEM_WB 4
-
-
-
-
-
-
-
-
-
-

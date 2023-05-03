@@ -9,6 +9,8 @@ module clint (
     /* TARP 总线 */
     input wire [`TRAP_BUS] trap_bus_i,
     /* ----- stall request from other modules 各个阶段请求流水线暂停请求 --------*/
+    input wire ram_stall_valid_if_i, // if 阶段访存暂停
+    input wire ram_stall_valid_mem_i,// mem 访存暂停
     input wire load_use_valid_id_i,  //load-use data hazard from id
     input wire jump_valid_ex_i,  // branch hazard from ex
     // input wire mutiple_alu_inst_valid_ex_i,  // div and mul isnt from ex
@@ -44,29 +46,45 @@ module clint (
 
   //stall request to PC,IF_ID, ID_EX, EX_MEM, MEM_WB
   localparam load_use_flush = 6'b000100;
-  localparam load_use_stall = 6'b000011; 
-  localparam jump_flush = 6'b000110; // 让EX 与 ID  NOP
+  localparam load_use_stall = 6'b000011;
+  localparam jump_flush = 6'b000110;
   localparam jump_stall = 6'b000000;
-  localparam trap_flush = 6'b001110; // 与 jal 类似，只是多一个周期
+  localparam trap_flush = 6'b001110;
   localparam trap_stall = 6'b000000;
+  localparam ram_if_flush = 6'b010000;
+  localparam ram_if_stall = 6'b001111;
+  localparam ram_mem_flush = 6'b010000;
+  localparam ram_mem_stall = 6'b001111;
   // localparam mutiple_alu_inst_flush = 6'b000011;
   // localparam mutiple_alu_inst_stall = 6'b000000;
 
 
-
+/* 流水线越往后,优先级越高 */
   always @(*) begin
     if (rst) begin
       stall_o = 6'b000000;
-      flush_o = 6'b000000;
+      flush_o = 6'b011111;
+    // 访存时阻塞所有流水线
+    end else if (ram_stall_valid_mem_i) begin
+      stall_o = ram_mem_stall;
+      flush_o = ram_mem_flush;
+    // 访存时阻塞所有流水线
+    end else if (ram_stall_valid_if_i) begin
+      stall_o = ram_if_stall;
+      flush_o = ram_if_flush;
+    // 中断|异常,(发生在 mem 阶段)
     end else if (_trap_valid) begin
       stall_o = trap_stall;
       flush_o = trap_flush;
+    // 跳转指令,(发生在 ex 阶段)
     end else if (jump_valid_ex_i) begin
       stall_o = jump_stall;
       flush_o = jump_flush;
+    // load use data 冲突,(发生在 id 阶段)
     end else if (load_use_valid_id_i) begin
       stall_o = load_use_stall;
       flush_o = load_use_flush;
+    // 没有异常情况,正常执行
     end else begin
       stall_o = 6'b000000;
       flush_o = 6'b000000;

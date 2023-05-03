@@ -368,6 +368,7 @@ module dcode (
                                 (_rs2_mem_bypass_valid)?mem_rd_data_i:
                                 rs2_data_i;
   // load-use hazard: 前一条指令为 load 类型，且下一条 rs1、rs2 为 load 指令的 rd，
+  // https://courses.cs.vt.edu/cs2506/Spring2013/Notes/L12.PipelineStalls.pdf
   wire _load_use_data_hazard_valid = _pre_inst_is_load & (_rs1_exc_bypass_valid | _rs2_exc_bypass_valid);
 
 

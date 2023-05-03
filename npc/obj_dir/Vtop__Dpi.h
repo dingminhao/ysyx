@@ -15,15 +15,15 @@ extern "C" {
     // DPI IMPORTS
     // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/writeback.v:30:32
     extern void inst_commit(long long pc, int inst, svBit commit_valid);
-    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/fetch.v:20:32
-    extern void pmem_inst_read(long long raddr, long long* rdata, char rmask);
-    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/memory.v:121:32
-    extern void pmem_read(long long pc, long long raddr, long long* rdata, char rmask);
-    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/memory.v:127:32
-    extern void pmem_write(long long pc, long long waddr, long long wdata, char wmask);
+    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/ram_arb.v:35:32
+    extern void pmem_read(int raddr, long long* rdata, char rmask);
+    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/ram_arb.v:41:32
+    extern void pmem_write(int waddr, long long wdata, char wmask);
     // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/rv64_gpr_regfile.v:38:32
     extern void set_gpr_ptr(const svOpenArrayHandle a);
-    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/memory.v:148:32
+    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/memory.v:171:32
+    extern void set_mem_pc(long long mem_pc);
+    // DPI import at /home/dmh/ysyx-workbench/npc/vsrc/core/memory.v:163:32
     extern void set_nextpc(long long nextpc);
 
 #ifdef __cplusplus
