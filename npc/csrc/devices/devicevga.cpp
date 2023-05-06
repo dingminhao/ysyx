@@ -155,3 +155,5 @@ void Devicevga::update() {
     vga_update_screen();
 }
 
+
+

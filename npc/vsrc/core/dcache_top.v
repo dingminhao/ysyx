@@ -75,6 +75,7 @@ module dcache_top (
 
 
   reg dcahce_rdata_ok;
+
   // cache<-->mem 端口 
   reg [`NPC_ADDR_BUS] _ram_raddr_dcache_o;
   reg _ram_raddr_valid_dcache_o;
@@ -116,7 +117,7 @@ module dcache_top (
           cache_line_temp <= 0;
           dcache_wmask <= 0;
           // cache data 为单端口 ram,不能同时读写, uncache 直接访问内存
-          if (mem_addr_valid_i && ~dcache_data_wen && ~uncache) begin
+          if (mem_addr_valid_i && ~uncache) begin
             case ({
               dcache_hit, mem_write_valid_i
             })

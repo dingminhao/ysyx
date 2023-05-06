@@ -17,13 +17,12 @@ module S011HD1P_X32Y2D128_BW (
     A,
     D
 );
-  parameter Bits = 128; //
-  parameter Word_Depth = 64;  // 数据位宽
-  parameter Add_Width = 6; // 地址位宽
-  parameter Wen_Width = 128; // 写掩码位宽 控制128位的数据是否写入数据
+  parameter Bits = 128;
+  parameter Word_Depth = 64;
+  parameter Add_Width = 6;
+  parameter Wen_Width = 128;
 
-  output reg [Bits-1:0] Q; 
-
+  output reg [Bits-1:0] Q;
   input CLK;
   input CEN;
   input WEN;
@@ -35,18 +34,12 @@ module S011HD1P_X32Y2D128_BW (
   wire wen = ~WEN;
   wire [Wen_Width-1:0] bwen = ~BWEN;
 
-  reg [Bits-1:0] ram[0:Word_Depth-1]; // 64 * 128位的ram
-  // 当ram使能 并且 写使能时，将写入的数据写入到ram中
-  // 如果写使能无效，则
+  reg [Bits-1:0] ram[0:Word_Depth-1];
   always @(posedge CLK) begin
     if (cen && wen) begin
-
-
-      ram[A] <= (D & bwen) | (ram[A] & ~bwen); // 写入
-    
-    
+      ram[A] <= (D & bwen) | (ram[A] & ~bwen);
     end
-    Q <= cen && !wen ? ram[A] : {4{$random}}; // 读值
+    Q <= cen && !wen ? ram[A] : {4{$random}};
   end
 
 endmodule
