@@ -38,10 +38,6 @@ module icache_top (
   wire [8:4] cache_line_idx = preif_raddr_i[8:4];
   // TAG 标记 
   wire [31:9] cache_line_tag = preif_raddr_i[31:9];
-  // cache line 寄存器组 128bit * 32
-  // reg [128-1:0] cache_line_regs[32-1:0];
-  // // cache line 的 tag 数组，与 cache line 一一对应
-  // reg [23-1:0] cache_tag_regs[32-1:0];
 
 
   //wire cache_hit = (cache_line_tag == cache_tag_regs[cache_line_idx]);

@@ -7,7 +7,7 @@
 module fetch (
     //指令地址
     input rst,
-    input [`XLEN_BUS] inst_addr_i,  // from pc_reg
+    input [`XLEN_BUS] pc_now_i,  // from pc_reg
     /* ram 接口 */
     // output [`NPC_ADDR_BUS] if_read_addr_o,  // 地址
     // output if_raddr_valid_o,  // 地址是否准备好
@@ -24,7 +24,7 @@ module fetch (
 );
 
 
-  assign inst_addr_o = inst_addr_i;
+  assign inst_addr_o = pc_now_i;
 
 
   // 选择读取数据

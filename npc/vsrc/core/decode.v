@@ -1,7 +1,7 @@
 `include "./../sysconfig.v"
 
 
-module dcode (
+module decode (
     /* from if/id */
     input [`XLEN_BUS] inst_addr_i,
     input [`INST_LEN-1:0] inst_data_i,
@@ -16,8 +16,6 @@ module dcode (
     /* from exc bypass */
     input [`XLEN_BUS] ex_rd_data_i,
     input [`REG_ADDRWIDTH-1:0] ex_rd_addr_i,
-    input [`CSR_REG_ADDRWIDTH-1:0] ex_csr_writeaddr_i,
-    input [`XLEN_BUS] ex_csr_writedata_i,
     /* from mem bypass */
     input [`XLEN_BUS] mem_rd_data_i,
     input [`REG_ADDRWIDTH-1:0] mem_rd_addr_i,
@@ -34,7 +32,7 @@ module dcode (
     output [          `IMM_LEN-1:0] csr_imm_o,
     output                          csr_imm_valid_o,
     output [`CSR_REG_ADDRWIDTH-1:0] csr_idx_o,
-    output [             `XLEN_BUS] csr_readdata_o,
+    output [             `XLEN_BUS] csr_data_o,
 
     output [`ALUOP_LEN-1:0] alu_op_o,  // alu 操作码
     output [`MEMOP_LEN-1:0] mem_op_o,  // mem 操作码
@@ -46,7 +44,7 @@ module dcode (
     output [`XLEN_BUS] inst_addr_o,
     output [`INST_LEN-1:0] inst_data_o,
     // 请求暂停流水线
-    output _load_use_valid_o,
+    output load_use_valid_o,
     /* TARP 总线 */
     output wire [`TRAP_BUS] trap_bus_o
 
@@ -375,7 +373,7 @@ module dcode (
   // 输出指定
   assign rs1_data_o = _rs1_data;
   assign rs2_data_o = _rs2_data;
-  assign _load_use_valid_o = _load_use_data_hazard_valid;
+  assign load_use_valid_o = _load_use_data_hazard_valid;
 
 
   /***************CSR 寄存器冲突处理*****************/
