@@ -8,6 +8,8 @@ wire [`XLEN_BUS] pc_now; // 正在执行的PC值
 wire [`XLEN_BUS] pc_next; // 下一条执行的PC值 
 wire read_req; // 是否读取指令 只要不是复位命令，读请求就有效
 
+
+
 // 计算出下一次的PC值
 pc_reg ysyx_22051145_pc_reg(
     .clk                (clk),
@@ -16,14 +18,13 @@ pc_reg ysyx_22051145_pc_reg(
     .stall_valid_i      (stall_clint),
     .flush_valid_i      (flush_clint),
     // 分支指令 包括 jalr jal beq bne blt bge bltu bgeu
-    .branch_pc_i        (), // 分支指令 来自exc阶段
-    .branch_pc_valid_i  (),
+    .branch_pc_i        (branch_pc_ex), // 分支指令 来自exc阶段
+    .branch_pc_valid_i  (branch_pc_valid_ex),
     // ecall ebreak mret
-    .clint_pc_i         (), // trap指令 来自mem阶段
-    .clint_pc_valid_i   (),
+    .clint_pc_i         (pc_clint), // trap指令 来自mem阶段
+    .clint_pc_valid_i   (pc_valid_clint),
     
     .read_req_o         (read_req), //向icache发送读请求
-    .if_rdata_valid_i   (), // icache数据准备好了s
 
     // PC值
     .pc_next_o          (pc_next),
@@ -42,8 +43,8 @@ fetch  ysyx_22051145_fetch(
     // 当前执行指令
     .pc_now_i(pc_now),
 
-    .if_rdata_valid_i(),  //数据准备好了 来自于icache中
-    .if_rdata_i(),
+    .if_rdata_valid_i(if_rdata_valid_icache),  //数据准备好了 来自于icache中
+    .if_rdata_i(if_rdata_icache),
 
     .ram_stall_valid_if_o(ram_stall_valid_if), //icache数据没有准备好，则指令暂停
     
@@ -59,7 +60,7 @@ wire [`TRAP_BUS] trap_bus_if_id; // trap指令
 
 if_id ysyx_22051145_if_id(
     .clk(clk),
-    .input(rst),
+    .rst(rst),
     // 流水控制
     .stall_valid_i(stall_clint),
     .flush_valid_i(flush_clint),
@@ -81,8 +82,7 @@ wire [`REG_ADDRWIDTH-1 : 0] rs1_idx_id;
 wire [`REG_ADDRWIDTH-1 : 0] rs2_idx_id;
 wire [`REG_ADDRWIDTH-1 : 0] rd_idx_id;
 wire [`CSR_REG_ADDRWIDTH-1 : 0] csr_idx_id;
-
-// rs1_data rs2_data csr_data
+//rs1 rs2 csr data
 wire [`XLEN_BUS] rs1_data_id;
 wire [`XLEN_BUS] rs2_data_id;
 wire [`XLEN_BUS] csr_data_id;
@@ -93,11 +93,11 @@ wire csr_imm_valid_id;
 wire [`XLEN_BUS] imm_data_id;
 
 // 计算操作符
-wire [`ALU_OP_WIDTH-1 : 0] alu_op_id;
-wire [`MEM_OP_WIDTH-1 : 0] mem_op_id;
-wire [`CSR_OP_WIDTH-1 : 0] csr_op_id;
+wire [`ALUOP_LEN-1 : 0] alu_op_id;
+wire [`MEMOP_LEN-1 : 0] mem_op_id;
+wire [`CSROP_LEN-1 : 0] csr_op_id;
 wire [`EXCOP_LEN-1 : 0] exc_op_id;
-wire [`PC_OP_LEN-1 : 0] pc_op_id;
+wire [`PCOP_LEN-1 : 0] pc_op_id;
 
 // PC and 指令
 wire [`XLEN_BUS] pc_id;
@@ -116,21 +116,21 @@ decode ysyx_22051145_decode(
     .trap_bus_i(trap_bus_if_id),
 
     // 来自于gpr_file
-    .rs1_data_i(),
-    .rs2_data_i(),
+    .rs1_data_i(rs1_data_gpr),
+    .rs2_data_i(rs2_data_gpr),
 
     // 来自于csr_file
-    .csr_data_i(),
+    .csr_data_i(csr_data_csr),
 
     // 来自于ID/EX阶段，用于判断上一条指令是否是访存指令 解决 load-use hazard
-    .id_ex_exc_op_i(),
+    .id_ex_exc_op_i(exc_op_id_ex),
 
     // EX bypass 是否rd等于rs1或者rs2，如果等于利用rd_data进行bypass
-    .ex_rd_data_i(),
-    .ex_rd_addr_i(),
+    .ex_rd_data_i(exc_alu_data_ex),
+    .ex_rd_addr_i(rd_idx_ex),
     // MEM bypass 
-    mem_rd_data_i(),
-    mem_rd_addr_i(),
+    .mem_rd_data_i(mem_data_mem),
+    .mem_rd_addr_i(rd_idx_mem),
 
     // 译码结果
     // rs1 rs2 rd 索引
@@ -183,11 +183,11 @@ wire [`XLEN_BUS] rs2_data_id_ex;
 wire [`XLEN_BUS] csr_data_id_ex;
 
 // 操作符相关
-wire [`ALU_OP_WIDTH-1 : 0] alu_op_id_ex;
-wire [`MEM_OP_WIDTH-1 : 0] mem_op_id_ex;
-wire [`CSR_OP_WIDTH-1 : 0] csr_op_id_ex;
+wire [`ALUOP_LEN-1 : 0] alu_op_id_ex;
+wire [`MEMOP_LEN-1 : 0] mem_op_id_ex;
+wire [`CSROP_LEN-1 : 0] csr_op_id_ex;
 wire [`EXCOP_LEN-1 : 0] exc_op_id_ex;
-wire [`PC_OP_LEN-1 : 0] pc_op_id_ex;
+wire [`PCOP_LEN-1 : 0] pc_op_id_ex;
 wire [`TRAP_BUS] trap_bus_id_ex;
 id_ex ysyx_22051145_id_ex(
     .clk(clk),
@@ -197,12 +197,16 @@ id_ex ysyx_22051145_id_ex(
     .stall_valid_i(stall_clint),
     // 输入 PC与指令
     .pc_id_ex_i(pc_id),
-    .inst_addr_id_ex_i(inst_id),
+    .inst_data_id_ex_i(inst_id),
     // rs1 rs2 rd 索引
-    .rs1_idx_id_ex_i(rs1_data_id),
+    .rs1_idx_id_ex_i(rs1_idx_id),
     .rs2_idx_id_ex_i(rs2_idx_id),
     .rd_idx_id_ex_i(rd_idx_id),
     .csr_idx_id_ex_i(csr_idx_id),
+    // 数据
+    .rs1_data_id_ex_i(rs1_data_id),
+    .rs2_data_id_ex_i(rs2_data_id),
+    .csr_data_id_ex_i(csr_data_id),
     // 立即数
     .imm_data_id_ex_i(imm_data_id),
     .csr_imm_id_ex_i(csr_imm_id),
@@ -217,20 +221,20 @@ id_ex ysyx_22051145_id_ex(
 
     // 输出 PC与指令
     .pc_id_ex_o(pc_id_ex),
-    .inst_addr_id_ex_o(inst_id_ex),
+    .inst_data_id_ex_o(inst_id_ex),
     // rs1 rs2 rd 索引
     .rs1_idx_id_ex_o(rs1_idx_id_ex),
     .rs2_idx_id_ex_o(rs2_idx_id_ex),
-    ,rd_idx_id_ex_o(rd_idx_id_ex),
+    .rd_idx_id_ex_o(rd_idx_id_ex),
     .csr_idx_id_ex_o(csr_idx_id_ex),
+    //  rs1 rs2 data
+    .rs1_data_id_ex_o(rs1_data_id_ex),
+    .rs2_data_id_ex_o(rs2_data_id_ex),
+    .csr_data_id_ex_o(csr_data_id_ex),
     // 立即数
     .imm_data_id_ex_o(imm_data_id_ex),
     .csr_imm_id_ex_o(csr_imm_id_ex),
     .csr_imm_valid_id_ex_o(csr_imm_valid_id_ex),
-    // 数据
-    .rs1_data_id_ex_o(rs1_data_id_ex),
-    .rs2_data_id_ex_o(rs2_data_id_ex),
-    .csr_data_id_ex_o(csr_data_id_ex),
     // 操作符
     .alu_op_id_ex_o(alu_op_id_ex),
     .mem_op_id_ex_o(mem_op_id_ex),
@@ -256,18 +260,18 @@ wire[`XLEN_BUS] csr_imm_ex;
 wire csr_imm_valid_ex;
 
 // 操作符相关
-wire [`MEM_OP_WIDTH-1 : 0] mem_op_ex;
-wire [`PC_OP_LEN-1 : 0] pc_op_ex;
+wire [`MEMOP_LEN-1 : 0] mem_op_ex;
+wire [`PCOP_LEN-1 : 0] pc_op_ex;
 
 // 送到ID
 wire [`CSR_REG_ADDRWIDTH-1 : 0] exc_csr_idx_ex;
 wire [`XLEN_BUS] exc_alu_data_ex;
 wire [`XLEN_BUS] exc_csr_data_ex;
 wire exc_csr_valid_ex;
-wire [`PC_OP_LEN-1 : 0]exc_op_ex;
+wire [`EXCOP_LEN-1 : 0]exc_op_ex;
 
 wire [`XLEN_BUS] branch_pc_ex;
-wire branch_pc_valid;
+wire branch_pc_valid_ex;
 
 wire jump_hazard_valid_ex;
 wire [`TRAP_BUS]trap_bus_ex;
@@ -280,8 +284,8 @@ execute_top ysyx_22051145_execute(
 
     // GPR的相关参数
     .rd_idx_i(rd_idx_id_ex),
-    .rs1_data_i(rs1_idx_id_ex),
-    .rs2_data_i(rs2_idx_id_ex),
+    .rs1_data_i(rs1_data_id_ex),
+    .rs2_data_i(rs2_data_id_ex),
     .imm_data_i(imm_data_id_ex),
 
     // csr的相关参数
@@ -325,7 +329,7 @@ execute_top ysyx_22051145_execute(
     .exc_op_o(exc_op_ex),
 
     .branch_pc_o(branch_pc_ex),
-    .branch_pc_valid_o(branch_pc_valid),
+    .branch_pc_valid_o(branch_pc_valid_ex),
 
     // 请求暂停流水线
     .jump_hazard_valid_o(jump_hazard_valid_ex),
@@ -346,8 +350,8 @@ wire [`XLEN_BUS] csr_data_ex_mem;
 wire csr_valid_ex_mem;
 wire [`CSR_REG_ADDRWIDTH-1 : 0]csr_idx_ex_mem;
 
-wire [`PC_OP_LEN-1 : 0]pc_op_ex_mem;
-wire [`MEM_OP_WIDTH-1 : 0]mem_op_ex_mem;
+wire [`PCOP_LEN-1 : 0]pc_op_ex_mem;
+wire [`MEMOP_LEN-1 : 0]mem_op_ex_mem;
 wire [`TRAP_BUS]trap_bus_ex_mem;
 ex_mem ysyx_22051145_ex_mem(
     .clk(clk),
@@ -359,10 +363,10 @@ ex_mem ysyx_22051145_ex_mem(
     .pc_ex_mem_i(pc_ex),
     .inst_data_ex_mem_i(inst_data_ex),
 
-    .imm_data_ex_mem_i(imm_data),
+    .imm_data_ex_mem_i(imm_data_ex),
     .rd_idx_ex_mem_i(rd_idx_ex),
-    .rs1_data_ex_mem_i(rs1_data),
-    .rs2_data_ex_mem_i(rs2_data),
+    .rs1_data_ex_mem_i(rs1_data_ex),
+    .rs2_data_ex_mem_i(rs2_data_ex),
     .alu_data_ex_mem_i(exc_alu_data_ex),
     
     // csr 相关操作
@@ -396,19 +400,15 @@ ex_mem ysyx_22051145_ex_mem(
     .trap_bus_ex_mem_o(trap_bus_ex_mem)
 );
 
-
-wire                           mem_data_ready;  // 读/写 数据是否准备好
-wire [             `XLEN_BUS]  mem_rdata;  // 返回到读取的数据
-
 wire [`XLEN_BUS] pc_mem;
 wire [`INST_LEN-1 : 0] inst_data_mem;
 
 // 对Dcache进行操作
-wire [`NPC_ADDR_BUS] mem_addr; // 内存地址
-wire mem_addr_valid; // 内存地址有效
-wire [7:0] mem_mask;  // 内存掩码
-wire mem_write_valid;
-wire [`XLEN_BUS] mem_wdata;
+wire [`NPC_ADDR_BUS] mem_addr_mem; // 内存地址
+wire mem_addr_valid_mem; // 内存地址有效
+wire [7:0] mem_mask_mem;  // 内存掩码
+wire mem_write_valid_mem;
+wire [`XLEN_BUS] mem_wdata_mem;
 
 // 流水线暂停信号
 wire ram_stall_valid_mem;
@@ -441,8 +441,8 @@ memory ysyx_22051145_memory(
     .exc_csr_valid_i(csr_valid_ex_mem),
 
     // dcache接口
-    .mem_data_ready_i(mem_data_ready), // dcache 是否准备好数据
-    .mem_rdata_i(mem_rdata), // dcache数据输入
+    .mem_data_ready_i(mem_data_ready_dcache), // dcache 是否准备好数据
+    .mem_rdata_i(mem_rdata_dcache), // dcache数据输入
     // 异常种类
     .trap_bus_i(trap_bus_ex_mem),
 
@@ -451,11 +451,12 @@ memory ysyx_22051145_memory(
     .inst_data_o(inst_data_mem),
 
     // 用于访问dcache
-    .mem_addr_o(mem_addr), //存储地址，用于访存
-    .mem_addr_valid_o(mem_addr_valid),  // 是否访问 dcache
-    .mem_mask_o(mem_mask), // 访存掩码
-    .mem_write_valid_o(mem_write_valid), // 是否写入
-    .mem_wdata_o(mem_wdata), // 写入数据
+    .mem_addr_o(mem_addr_mem), //存储地址，用于访存
+    .mem_addr_valid_o(mem_addr_valid_mem),  // 是否访问 dcache
+    .mem_mask_o(mem_mask_mem), // 访存掩码
+    // 写
+    .mem_write_valid_o(mem_write_valid_mem), // 是否写入
+    .mem_wdata_o(mem_wdata_mem), // 写入数据
 
     .ram_stall_valid_mem_o(ram_stall_valid_mem), // 如果数据没有准备好，暂停流水线
 
@@ -484,8 +485,8 @@ wire csr_mcause_write_valid_clint;
 wire csr_mtval_write_valid_clint;
 wire csr_mtvec_write_valid_clint;
 
-wire [`XLEN_BUS] cline_pc_clint;
-wire clint_pc_valid_clint;
+wire [`XLEN_BUS] pc_clint;
+wire pc_valid_clint;
 
 // 全局stall 与 flush管理
 wire [5:0] stall_clint;
@@ -505,27 +506,27 @@ clint ysyx_22051145_clint(
     .jump_valid_ex_i(jump_hazard_valid_ex), // EX阶段发现跳转
 
     // csr寄存器相关 读数据 利用csr的读数据计算
-    .csr_mstatus_readdata_i(),
-    .csr_mepc_readdata_i(),
-    .csr_mcause_readdata_i(),
-    .csr_mtval_readdata_i(),
-    .csr_mtvec_readdata_i(),
+    .csr_mstatus_readdata_i(csr_mstatus_readdata_csr),
+    .csr_mepc_readdata_i(csr_mepc_readdata_csr),
+    .csr_mcause_readdata_i(csr_mcause_readdata_csr),
+    .csr_mtval_readdata_i(csr_mtval_readdata_csr),
+    .csr_mtvec_readdata_i(csr_mtvec_readdata_csr),
 
     // csr写数据相关
-    .csr_mstatus_writedata_o(csr_mstatus_writedata),
-    .csr_mepc_writedata_o(csr_mepc_writedata),
-    .csr_mcause_writedata_o(csr_mcause_writedata),
-    .csr_mtval_writedata_o(csr_mtval_writedata),
-    .csr_mtvec_writedata_o(csr_mtvec_writedata),
-    .csr_mstatus_write_valid_o(csr_mstatus_write_valid),
-    .csr_mepc_write_valid_o(csr_mepc_write_valid),
-    .csr_mcause_write_valid_o(csr_mcause_write_valid),
-    .csr_mtval_write_valid_o(csr_mtval_write_valid),
-    .csr_mtvec_write_valid_o(csr_mtvec_write_valid),
+    .csr_mstatus_writedata_o(csr_mstatus_writedata_clint),
+    .csr_mepc_writedata_o(csr_mepc_writedata_clint),
+    .csr_mcause_writedata_o(csr_mcause_writedata_clint),
+    .csr_mtval_writedata_o(csr_mtval_writedata_clint),
+    .csr_mtvec_writedata_o(csr_mtvec_writedata_clint),
+    .csr_mstatus_write_valid_o(csr_mstatus_write_valid_clint),
+    .csr_mepc_write_valid_o(csr_mepc_write_valid_clint),
+    .csr_mcause_write_valid_o(csr_mcause_write_valid_clint),
+    .csr_mtval_write_valid_o(csr_mtval_write_valid_clint),
+    .csr_mtvec_write_valid_o(csr_mtvec_write_valid_clint),
 
     // 中断地址传递给pc
-    .clint_pc_o(cline_pc_clint),
-    .clint_pc_valid_o(clint_pc_valid_clint),
+    .clint_pc_o(pc_clint),
+    .clint_pc_valid_o(pc_valid_clint),
 
     // 控制流水线
     .stall_o(stall_clint),
@@ -546,10 +547,10 @@ wire csr_mtvec_write_valid_mem_wb;
 wire [`XLEN-1:0 ] pc_mem_wb;  
 wire [`INST_LEN-1:0 ] inst_data_mem_wb; 
 
-wire [`CSR_REG_ADDRWIDTH-1:0 ] csr_addr_mem_wb;  //csr 写回地址
+wire [`CSR_REG_ADDRWIDTH-1:0 ] csr_idx_mem_wb;  //csr 写回地址
 wire [             `XLEN_BUS]  exc_csr_data_mem_wb;  //csr 写回数据
 wire                           exc_csr_valid_mem_wb;  // csr 写回使能
-wire [    `REG_ADDRWIDTH-1:0 ] rd_addr_mem_wb;  // gpr 写回使能
+wire [    `REG_ADDRWIDTH-1:0 ] rd_idx_mem_wb;  // gpr 写回使能
 wire [             `XLEN-1:0 ] mem_data_mem_wb;  //访存阶段的数据
 
 mem_wb ysyx_22051145_mem_wb(
@@ -579,7 +580,7 @@ mem_wb ysyx_22051145_mem_wb(
     .csr_addr_mem_wb_i(csr_idx_mem),
     .exc_csr_data_mem_wb_i(exc_csr_data_mem),
     .exc_csr_valid_mem_wb_i(exc_csr_valid_mem),
-    .rd_addr_mem_wb_i(rd_addr_mem),
+    .rd_addr_mem_wb_i(rd_idx_mem),
     .mem_data_mem_wb_i(mem_data_mem),
 
     // 输出
@@ -598,11 +599,11 @@ mem_wb ysyx_22051145_mem_wb(
     .pc_mem_wb_o(pc_mem_wb),
     .inst_data_mem_wb_o(inst_data_mem_wb),
 
-    .csr_addr_mem_wb_o(csr_addr_mem_wb),
+    .csr_addr_mem_wb_o(csr_idx_mem_wb),
     .exc_csr_data_mem_wb_o(exc_csr_data_mem_wb),
     .exc_csr_valid_mem_wb_o(exc_csr_valid_mem_wb),
 
-    .rd_addr_mem_wb_o(rd_addr_mem_wb),
+    .rd_addr_mem_wb_o(rd_idx_mem_wb),
     .mem_data_mem_wb_o(mem_data_mem_wb)
 
 );
@@ -618,7 +619,10 @@ writeback ysyx_22051145_wb(
 
     .pc_wb_i(pc_mem_wb),
     .inst_data_wb_i(inst_data_mem_wb)
-)
+);
+
+wire [`XLEN_BUS]rs1_data_gpr;
+wire [`XLEN_BUS]rs2_data_gpr;
 
 // gpr寄存器
 rv64_gpr_regfile ysyx_22051145_gpr(
@@ -628,13 +632,13 @@ rv64_gpr_regfile ysyx_22051145_gpr(
     .rs1_idx_i(rs1_idx_id),
     .rs2_idx_i(rs2_idx_id),
     // 读数据输出
-    .rs1_data_o(rs1_data_id),
-    .rs2_data_o(rs2_data_id),
+    .rs1_data_o(rs1_data_gpr),
+    .rs2_data_o(rs2_data_gpr),
 
     // 数据写入
-    .write_idx_i(rd_addr_mem_wb),
+    .write_idx_i(rd_idx_mem_wb),
     .write_data_i(mem_data_mem_wb),
-    .write_valid_i(1'b1)
+    .write_data_valid_i(1'b1)
 );
 
 
@@ -674,7 +678,7 @@ rv64_csr_regfile ysyx_22051145_rv64_csr_regfile(
     .csr_readaddr_i(csr_idx_id),
     .csr_readdata_o(csr_data_csr),
     
-    .csr_writeaddr_i(csr_addr_mem_wb),
+    .csr_writeaddr_i(csr_idx_mem_wb),
     .csr_write_valid_i(exc_csr_valid_mem_wb),       
     .csr_writedata_i(exc_csr_data_mem_wb)
 );
@@ -684,7 +688,7 @@ rv64_csr_regfile ysyx_22051145_rv64_csr_regfile(
 
 // Icache
 
-wire [`XLEN_BUS] if_rdata_icache;
+wire [`XLEN_BUS] if_rdata_icache;// 为什么将取指令为64位？
 wire if_rdata_valid_icache;
 
 wire [`NPC_ADDR_BUS] ram_raddr_icache;
@@ -706,46 +710,93 @@ icache_top ysyx_22051145_icache_top(
     // 由于cache中没有渠道数据，则在mem中进行取数据
     .ram_raddr_icache_o(ram_raddr_icache),
     .ram_raddr_valid_icache_o(ram_raddr_valid_icache),
-    .ram_rmask_icache_o(ram_raddr_valid_icache),
+    .ram_rmask_icache_o(ram_rmask_icache),
 
     // mem 是否准备好数据
-    .ram_rdata_ready_icache_i(),
-    .ram_rdata_icache_i()
+    .ram_rdata_ready_icache_i(if_rdata_valid_ram),
+    .ram_rdata_icache_i(if_rdata_ram)
 );
+// dcache读内存输出
+wire [`XLEN_BUS] mem_rdata_dcache;
+wire mem_data_ready_dcache;
+// ram读端口输出
+wire [`NPC_ADDR_BUS] ram_raddr_dcache;
+wire ram_raddr_valid_dcache;
+wire [7:0] ram_rmask_dcache;
+// ram写端口输出
+wire [`NPC_ADDR_BUS] ram_waddr_dcache;
+wire ram_waddr_valid_dcache;
+wire [7:0] ram_wmask_dcache;
+wire [`XLEN_BUS] ram_wdata_dcache;
 
 
-dcahche_top(
+dcache_top ysyx_22051145_dcache(
     .clk(clk),
     .rst(rst),
 
     // cpu与dcache之间的接口
-    .mem_addr_i(mem_addr),
-    .mem_mask_i(mem_mask),
-    .mem_addr_valid_i(mem_addr_valid),
+    .mem_addr_i(mem_addr_mem),
+    .mem_mask_i(mem_mask_mem),
+    .mem_addr_valid_i(mem_addr_valid_mem),
     // 写数据
-    .mem_write_valid_i(mem_write_valid),
-    .mem_wdata_i(mem_wdata),
+    .mem_write_valid_i(mem_write_valid_mem),
+    .mem_wdata_i(mem_wdata_mem),
 
     // 输出 读取的数据
-    .mem_rdata_o (),
-    .mem_data_ready_o(), // dcache数据准备完毕
+    .mem_rdata_o (mem_rdata_dcache),
+    .mem_data_ready_o(mem_data_ready_dcache), // dcache数据准备完毕
+
+
 
     // dcache 与 mem 之间的接口 
+    .ram_rdata_ready_dcache_i(mem_rdata_valid_ram),
+    .ram_rdata_dcache_i(mem_rdata_ram),
+    .ram_wdata_ready_dcache_i(mem_wdata_ready_ram),
     // 读端口
-    .ram_raddr_dcache_o(),
-    .ram_raddr_valid_dcache_o(),
-    .ram_rmask_dcache_o(),
-    // mem读数据准备好
-    .ram_rdata_ready_dcache_i(),
-    .ram_rdata_dcache_i(),
-
+    .ram_raddr_dcache_o(ram_raddr_dcache),
+    .ram_raddr_valid_dcache_o(ram_raddr_valid_dcache),
+    .ram_rmask_dcache_o(ram_rmask_dcache),
     // 写端口
-    .ram_waddr_dcache_o(),
-    .ram_waddr_valid_dcache_o(),
-    .ram_wmask_dcache_o(),
-    // 写数据准备好
-    .ram_wdata_ready_dcache_i(),
-    .ram_wdata_dcache_o()
+    .ram_waddr_dcache_o(ram_waddr_dcache),
+    .ram_waddr_valid_dcache_o(ram_waddr_valid_dcache),
+    .ram_wmask_dcache_o(ram_wmask_dcache),
+    .ram_wdata_dcache_o(ram_wdata_dcache)
 );
+// ram模块 对于 mem的读写接口的输出
+wire [`XLEN_BUS] mem_rdata_ram;// ram的mem读数据
+wire mem_rdata_valid_ram;// ram的mem读数据有效
+wire mem_wdata_ready_ram; // ram的mem写数据有效
 
+// ram 对于 取指接口的输出
+wire if_rdata_valid_ram;
+wire [`XLEN-1:0] if_rdata_ram;
+
+ram_arb ysyx_22051145_ram(
+    .clk(clk),
+    .rst(rst),
+
+    // IF阶段的读接口
+    .if_read_addr_i(ram_raddr_icache),
+    .if_valid_i(ram_raddr_valid_icache),
+    .if_rmask_i(ram_rmask_icache),
+    // ram IF 读接口输出
+    .if_rdata_o(if_rdata_ram),
+    .if_rdata_valid_o(if_rdata_valid_ram),
+
+    // MEM 访存请求接口
+    .mem_read_addr_i(ram_raddr_dcache),
+    .mem_valid_i(ram_raddr_valid_dcache),
+    .mem_rmask_i(ram_rmask_dcache),
+    // MEM 读接口输出
+    .mem_rdata_o(mem_rdata_ram),
+    .mem_rdata_valid_o(mem_rdata_valid_ram),
+
+    // MEM 写接口
+    .mem_write_addr_i(ram_waddr_dcache),
+    .mem_write_valid_i(ram_waddr_valid_dcache),
+    .mem_wmask_i(ram_wmask_dcache),
+    .mem_wdata_i(ram_wdata_dcache),
+    // MEM 写接口输出
+    .mem_wdata_ready_o(mem_wdata_ready_ram)
+);
 endmodule

@@ -16,7 +16,6 @@ module pc_reg (
     input [`XLEN_BUS] clint_pc_i,         //trap pc,来自mem
     input             clint_pc_valid_i,   //trap pc valide,来自mem
 
-    input              if_rdata_valid_i,
     output             read_req_o,
     output [`XLEN_BUS] pc_next_o,         //输出 next_pc
     output [`XLEN_BUS] pc_o               //输出pc

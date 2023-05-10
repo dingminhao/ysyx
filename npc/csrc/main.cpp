@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <verilated.h>
-#include <Vtop.h>
+#include <Vysyx_22051145_top.h>
 #include "verilated_vcd_c.h"
 #include "simtop.h"
 #include "cppreadline/Console.hpp"

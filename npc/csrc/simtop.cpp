@@ -22,7 +22,7 @@ Simtop::Simtop() {
     tfp = new VerilatedVcdC;
     contextp->traceEverOn(true);
 #endif
-    top = new Vtop;
+    top = new Vysyx_22051145_top;
 #ifdef TOP_TRACE
     top->trace(tfp, 0);
     tfp->open("sim.vcd");
@@ -215,7 +215,7 @@ void Simtop::excute() {
         stepCycle(false);
     }
 }
-Vtop* Simtop::getTop() {
+Vysyx_22051145_top* Simtop::getTop() {
 
     return this->top;
 }

@@ -23,6 +23,7 @@ module id_ex (
     input      [        `EXCOP_LEN-1:0] exc_op_id_ex_i,         // exc 操作码
     input      [         `PCOP_LEN-1:0] pc_op_id_ex_i,          // pc 操作码
     input      [        `CSROP_LEN-1:0] csr_op_id_ex_i,         // csr 操作码
+
     /* TARP 总线 */
     input wire [             `TRAP_BUS] trap_bus_id_ex_i,
 

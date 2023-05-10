@@ -1,7 +1,7 @@
 #include <iostream>
 #include <verilated_vcd_c.h>
 #include <verilated.h>
-#include <Vtop.h>
+#include <Vysyx_22051145_top.h>
 #include "verilated_dpi.h"
 #include "simtop.h"
 #include "simconf.h"

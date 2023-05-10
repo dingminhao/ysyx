@@ -5,7 +5,7 @@
 #include <list>
 #include <verilated_vcd_c.h>
 #include <verilated.h>
-#include <Vtop.h>
+#include <Vysyx_22051145_top.h>
 #include <iomanip>
 #include "verilated_dpi.h"
 #include "simMem.h"
@@ -18,7 +18,7 @@
 
 class Simtop {
 private:
-    Vtop* top;
+    Vysyx_22051145_top* top;
     VerilatedContext* contextp;
     VerilatedVcdC* tfp;
     uint64_t* registerfile;
@@ -42,7 +42,7 @@ private:
         {"wp",false},
         {"wave",true},
         {"reg",false},
-        {"itrace",false},
+        {"itrace",true},
         {"mtrace",false},
         {"ftrace",false},
         {"dtrace",false}
@@ -68,7 +68,7 @@ public:
 
     Simtop();
     ~Simtop();
-    Vtop* getTop();
+    Vysyx_22051145_top* getTop();
     void reset();
     bool npcHitGood();
     uint64_t getRegVal(int idx);
