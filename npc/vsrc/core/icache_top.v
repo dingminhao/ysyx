@@ -11,37 +11,47 @@
 // 6. 组号: 5bit（2^5==32）
 // 6. tag: 32-4-5 == 23 bit 
 
+/*
+`define NPC_ADDR_LEN 32
+`define NPC_ADDR_BUS `NPC_ADDR_LEN-1:0
+*/
 module icache_top (
-    input clk,
-    input rst,
+    input clk, // 时钟
+    input rst, // 复位
     /* cpu<-->cache 端口 */
-    input [`NPC_ADDR_BUS] preif_raddr_i,  // CPU 的访存信息  接收到的PC为下一跳的PC的值
-    input [7:0] preif_rmask_i,  // 访存掩码  
-    input preif_raddr_valid_i,  // 地址是否有效，无效时，停止访问 cache 
+    input [`NPC_ADDR_BUS] preif_raddr_i,  // CPU 的访存信息 
+    input [7:0] preif_rmask_i,  // 访存掩码
+    input preif_raddr_valid_i,  // 地址是否有效，无效时，停止访问 cache
     output [`XLEN_BUS] if_rdata_o,  // icache 返回读数据
 
     //input  if_rdata_ready_i,  // 是否准备好接收数据
     output if_rdata_valid_o,  // icache 读数据是否准备好(未准备好需要暂停流水线)
 
     /* cache<-->mem 端口 */
-    output [`NPC_ADDR_BUS] ram_raddr_icache_o,
+    output [`NPC_ADDR_BUS] ram_raddr_icache_o, 
     output ram_raddr_valid_icache_o,
     output [7:0] ram_rmask_icache_o,
-    /*准备好数据*/
-    input ram_rdata_ready_icache_i,
+
+    input ram_rdata_ready_icache_i, // 读数据是否已经准备好
+
     input [`XLEN_BUS] ram_rdata_icache_i
 );
 
   // 块内地址
-  wire [3:0] cache_blk_addr = preif_raddr_i[3:0];
-  // 组号
-  wire [8:4] cache_line_idx = preif_raddr_i[8:4];
+  wire [3:0] cache_blk_addr = preif_raddr_i[3:0]; // 在cache line 中的第几个字节   可能的取值范围  0  4  8  12   四个字节
+  // 组号 
+  wire [8:4] cache_line_idx = preif_raddr_i[8:4]; // 在 cache 中的第几个组
   // TAG 标记 
-  wire [31:9] cache_line_tag = preif_raddr_i[31:9];
+  wire [31:9] cache_line_tag = preif_raddr_i[31:9]; // 
+
+  // cache line 寄存器组 128bit * 32    // 存储四条指令
+  // reg [128-1:0] cache_line_regs[32-1:0];  
+  // // cache line 的 tag 数组，与 cache line 一一对应
+  // reg [23-1:0] cache_tag_regs[32-1:0];
 
 
   //wire cache_hit = (cache_line_tag == cache_tag_regs[cache_line_idx]);
-  wire icache_hit;
+  wire icache_hit; // 是否命中
 
   /* cache 命中 */
   localparam CACHE_RST = 4'd0;
@@ -50,28 +60,31 @@ module icache_top (
   localparam CACHE_MISS = 4'd3;
   localparam CACHE_MISS2 = 4'd4;
 
-  reg [3:0] icahce_state;
+  reg [3:0] icahce_state; // 状态机参数
 
 
-  reg [3:0] blk_addr_reg;
+  reg [3:0] blk_addr_reg; 
   reg [4:0] line_idx_reg;
   reg [22:0] line_tag_reg;
   reg icache_tag_wen;
 
 
-  reg icahce_rdata_ok;
-  // cache<-->mem 端口 
-  reg [`NPC_ADDR_BUS] _ram_raddr_icache_o;
-  reg _ram_raddr_valid_icache_o;
-  reg [7:0] _ram_rmask_icache_o;
+  reg icahce_rdata_ok; // 是否数据已经准备好
 
-  reg [127:0] cache_line_temp;
-  reg icache_data_wen;
+  // cache<-->mem 端口 
+  reg [`NPC_ADDR_BUS] _ram_raddr_icache_o; // cache 读取 ram 的地址
+  reg _ram_raddr_valid_icache_o; // cache 读取 ram 的地址是否有效
+  reg [7:0] _ram_rmask_icache_o; // cache 读取 ram 的掩码
+
+  reg [127:0] cache_line_temp; // 临时存储 cache line 数据
+  reg icache_data_wen; // icache 数据写使能
 
 
   always @(posedge clk) begin
     if (rst) begin
+      // 初始化
       icahce_state <= CACHE_RST;
+
       blk_addr_reg <= 0;
       line_idx_reg <= 0;
       line_tag_reg <= 0;
@@ -84,26 +97,30 @@ module icache_top (
           icahce_state <= CACHE_IDLE;
         end
         CACHE_IDLE: begin
+          // 得到解析出来的 字节地址
           blk_addr_reg <= cache_blk_addr;
           line_idx_reg <= cache_line_idx;
           line_tag_reg <= cache_line_tag;
+
           icache_tag_wen <= `FALSE;
           icache_data_wen <= 0;
           cache_line_temp <= 0;
           // cache data 为单端口 ram,不能同时读写
-          if (preif_raddr_valid_i) begin
+          if (preif_raddr_valid_i && ~icache_data_wen) begin // 地址有效 且 未写使能
             // hit
-            if (icache_hit) begin
+            if (icache_hit) begin // 如果命中
               // 下一个周期给数据
               //icache_data <= {32'b0, cache_line_regs[cache_line_idx][cache_blk_addr*8+:32]};
-              icahce_rdata_ok <= `TRUE;
-              icahce_state <= CACHE_IDLE;
+              icahce_rdata_ok <= `TRUE; // 数据准备好
+              icahce_state <= CACHE_IDLE; // 状态机保持不变
             end else begin  // miss 
               icahce_state <= CACHE_MISS;
               icahce_rdata_ok <= `FALSE;
+              // 如果没有命中cache则需要从内存中读取数据
               _ram_raddr_icache_o <= {cache_line_tag, cache_line_idx, 4'b0};  // 读地址
               _ram_raddr_valid_icache_o <= `TRUE;  // 地址有效
               _ram_rmask_icache_o <= 8'b1111_1111;  // 读掩码
+
             end
           end else begin
             icahce_rdata_ok <= `FALSE;
@@ -113,7 +130,9 @@ module icache_top (
         CACHE_MISS: begin
           if (_ram_raddr_valid_icache_o & ram_rdata_ready_icache_i) begin
             cache_line_temp[63:0] <= ram_rdata_icache_i;  // 临时保存 cache line 部分数据
+            // 什么意思？
             _ram_raddr_icache_o <= {line_tag_reg, line_idx_reg, 4'd8};  // 读地址
+
             icahce_state <= CACHE_MISS2;
           end
         end
@@ -169,7 +188,7 @@ module icache_top (
   );
 
   //icache_data <= {32'b0, cache_line_regs[cache_line_idx][cache_blk_addr*8+:32]};
-  wire [`XLEN_BUS] _icache_data_o = {32'b0, icache_line_rdata[blk_addr_reg*8+:32]};
+  wire [`XLEN_BUS] _icache_data_o = {32'b0, icache_line_rdata[blk_addr_reg*8+:32]}; // 每次取一个指令 一个cacheline有四条指令
 
 
 
@@ -185,3 +204,4 @@ module icache_top (
 
 
 endmodule
+

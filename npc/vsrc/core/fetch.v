@@ -8,10 +8,6 @@ module fetch (
     //指令地址
     input rst,
     input [`XLEN_BUS] pc_now_i,  // from pc_reg
-    /* ram 接口 */
-    // output [`NPC_ADDR_BUS] if_read_addr_o,  // 地址
-    // output if_raddr_valid_o,  // 地址是否准备好
-    // output [7:0] if_rmask_o,  // 数据掩码,读取多少位
     input if_rdata_valid_i,  // 读数据是否准备好
     input [`XLEN_BUS] if_rdata_i,
 

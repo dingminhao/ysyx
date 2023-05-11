@@ -170,8 +170,8 @@ VL_MODULE(Vysyx_22051145_top___024root) {
         QData/*63:0*/ ysyx_22051145_top__DOT__mem_data_mem;
         QData/*63:0*/ ysyx_22051145_top__DOT__csr_mstatus_writedata_clint;
         QData/*63:0*/ ysyx_22051145_top__DOT__csr_mtvec_writedata_clint;
-        QData/*63:0*/ ysyx_22051145_top__DOT__ysyx_22051145_pc_reg__DOT___pc_current;
-        QData/*63:0*/ ysyx_22051145_top__DOT__ysyx_22051145_pc_reg__DOT___pc_next_d;
+        QData/*63:0*/ ysyx_22051145_top__DOT__u_pc_reg__DOT___pc_current;
+        QData/*63:0*/ ysyx_22051145_top__DOT__u_pc_reg__DOT___pc_next_d;
         QData/*63:0*/ ysyx_22051145_top__DOT__ysyx_22051145_if_id__DOT___inst_addr_if_id_q;
         QData/*63:0*/ ysyx_22051145_top__DOT__ysyx_22051145_decode__DOT___imm_data;
         QData/*63:0*/ ysyx_22051145_top__DOT__ysyx_22051145_id_ex__DOT___pc_id_ex_q;
