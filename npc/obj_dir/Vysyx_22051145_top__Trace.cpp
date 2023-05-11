@@ -28,7 +28,7 @@ void Vysyx_22051145_top___024root__traceChgSub0(Vysyx_22051145_top___024root* vl
             tracep->chgIData(oldp+0,(vlSelf->ysyx_22051145_top__DOT__ysyx_22051145_fetch__DOT___if_trap_bus),19);
         }
         if (VL_UNLIKELY(vlSelf->__Vm_traceActivity[1U])) {
-            tracep->chgQData(oldp+1,(vlSelf->ysyx_22051145_top__DOT__u_pc_reg__DOT___pc_current),64);
+            tracep->chgQData(oldp+1,(vlSelf->ysyx_22051145_top__DOT__ysyx_22051145_pc_reg__DOT___pc_current),64);
             tracep->chgIData(oldp+3,(((IData)(vlSelf->ysyx_22051145_top__DOT__if_rdata_valid_icache)
                                        ? ((((0U == 
                                              (0x1fU 
@@ -764,7 +764,7 @@ void Vysyx_22051145_top___024root__traceChgSub0(Vysyx_22051145_top___024root* vl
                          [1U] | vlSelf->__Vm_traceActivity
                          [2U]))) {
             tracep->chgQData(oldp+415,(((IData)(vlSelf->ysyx_22051145_top__DOT__ysyx_22051145_if_id__DOT___flush_valid)
-                                         ? 0ULL : vlSelf->ysyx_22051145_top__DOT__u_pc_reg__DOT___pc_current)),64);
+                                         ? 0ULL : vlSelf->ysyx_22051145_top__DOT__ysyx_22051145_pc_reg__DOT___pc_current)),64);
             tracep->chgIData(oldp+417,(((IData)(vlSelf->ysyx_22051145_top__DOT__ysyx_22051145_if_id__DOT___flush_valid)
                                          ? 0x13U : 
                                         ((IData)(vlSelf->ysyx_22051145_top__DOT__if_rdata_valid_icache)
@@ -1015,7 +1015,7 @@ void Vysyx_22051145_top___024root__traceChgSub0(Vysyx_22051145_top___024root* vl
             tracep->chgQData(oldp+474,(vlSelf->ysyx_22051145_top__DOT__pc_next),64);
             tracep->chgCData(oldp+476,(vlSelf->ysyx_22051145_top__DOT__stall_clint),6);
             tracep->chgCData(oldp+477,(vlSelf->ysyx_22051145_top__DOT__flush_clint),6);
-            tracep->chgQData(oldp+478,(vlSelf->ysyx_22051145_top__DOT__u_pc_reg__DOT___pc_next_d),64);
+            tracep->chgQData(oldp+478,(vlSelf->ysyx_22051145_top__DOT__ysyx_22051145_pc_reg__DOT___pc_next_d),64);
             tracep->chgBit(oldp+480,((1U & (~ ((IData)(vlSelf->ysyx_22051145_top__DOT__stall_clint) 
                                                >> 1U)))));
             tracep->chgIData(oldp+481,(((IData)(vlSelf->ysyx_22051145_top__DOT__ysyx_22051145_if_id__DOT___flush_valid)

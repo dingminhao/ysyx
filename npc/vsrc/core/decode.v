@@ -32,7 +32,7 @@ module decode (
     output [          `IMM_LEN-1:0] csr_imm_o,
     output                          csr_imm_valid_o,
     output [`CSR_REG_ADDRWIDTH-1:0] csr_idx_o,
-    output [             `XLEN_BUS] csr_data_o,
+    output [             `XLEN_BUS] csr_readdata_o,
 
     output [`ALUOP_LEN-1:0] alu_op_o,  // alu 操作码
     output [`MEMOP_LEN-1:0] mem_op_o,  // mem 操作码
@@ -378,7 +378,7 @@ module decode (
 
   /***************CSR 寄存器冲突处理*****************/
   // TODO ,添加数据旁路
-  assign csr_data_o = csr_data_i;
+  assign csr_readdata_o = csr_data_i;
 
   /******************************************×××××××***************************************************/
 

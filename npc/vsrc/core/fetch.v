@@ -8,6 +8,7 @@ module fetch (
     //指令地址
     input rst,
     input [`XLEN_BUS] pc_now_i,  // from pc_reg
+    /* ram 接口 */
     input if_rdata_valid_i,  // 读数据是否准备好
     input [`XLEN_BUS] if_rdata_i,
 

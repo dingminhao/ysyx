@@ -40,7 +40,7 @@ module dcache_top (
 
   // uncache 检查
 
-  wire uncache = (mem_addr_i & `MMIO_BASE) == `MMIO_BASE;// 为什么要进行检查 uncache
+  wire uncache = (mem_addr_i & `MMIO_BASE) == `MMIO_BASE;
 
   // 块内地址
   wire [3:0] cache_blk_addr = mem_addr_i[3:0];
@@ -75,7 +75,6 @@ module dcache_top (
 
 
   reg dcahce_rdata_ok;
-
   // cache<-->mem 端口 
   reg [`NPC_ADDR_BUS] _ram_raddr_dcache_o;
   reg _ram_raddr_valid_dcache_o;
@@ -117,7 +116,7 @@ module dcache_top (
           cache_line_temp <= 0;
           dcache_wmask <= 0;
           // cache data 为单端口 ram,不能同时读写, uncache 直接访问内存
-          if (mem_addr_valid_i && ~uncache) begin
+          if (mem_addr_valid_i && ~dcache_data_wen && ~uncache) begin
             case ({
               dcache_hit, mem_write_valid_i
             })
@@ -387,3 +386,4 @@ module dcache_top (
 
 
 endmodule
+

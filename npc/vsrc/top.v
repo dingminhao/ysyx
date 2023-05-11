@@ -142,7 +142,7 @@ decode ysyx_22051145_decode(
     // 数据传递用来bypass
     .rs1_data_o(rs1_data_id),
     .rs2_data_o(rs2_data_id),
-    .csr_data_o(csr_data_id),
+    .csr_readdata_o(csr_data_id),
 
     // imm
     .csr_imm_o(csr_imm_id),
