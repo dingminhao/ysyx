@@ -8,17 +8,15 @@
 #ifndef VERILATED_VYSYX_22051145_TOP_H_
 #define VERILATED_VYSYX_22051145_TOP_H_  // guard
 
-#include "verilated_heavy.h"
+#include "verilated.h"
 #include "svdpi.h"
 
 class Vysyx_22051145_top__Syms;
 class Vysyx_22051145_top___024root;
 class VerilatedVcdC;
-class Vysyx_22051145_top_VerilatedVcd;
-
 
 // This class is the main interface to the Verilated model
-class Vysyx_22051145_top VL_NOT_FINAL {
+class alignas(VL_CACHE_LINE_BYTES) Vysyx_22051145_top VL_NOT_FINAL : public VerilatedModel {
   private:
     // Symbol table holding complete model state (owned by this class)
     Vysyx_22051145_top__Syms* const vlSymsp;
@@ -62,13 +60,20 @@ class Vysyx_22051145_top VL_NOT_FINAL {
     void eval_end_step() {}
     /// Simulation complete, run final blocks.  Application must call on completion.
     void final();
+    /// Are there scheduled events to handle?
+    bool eventsPending();
+    /// Returns time at next time slot. Aborts if !eventsPending()
+    uint64_t nextTimeSlot();
     /// Trace signals in the model; called by application code
     void trace(VerilatedVcdC* tfp, int levels, int options = 0);
-    /// Return current simulation context for this model.
-    /// Used to get to e.g. simulation time via contextp()->time()
-    VerilatedContext* contextp() const;
     /// Retrieve name of this model instance (as passed to constructor).
     const char* name() const;
-} VL_ATTR_ALIGNED(VL_CACHE_LINE_BYTES);
+
+    // Abstract methods from VerilatedModel
+    const char* hierName() const override final;
+    const char* modelName() const override final;
+    unsigned threads() const override final;
+    std::unique_ptr<VerilatedTraceConfig> traceConfig() const override final;
+};
 
 #endif  // guard

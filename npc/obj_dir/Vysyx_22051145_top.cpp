@@ -10,15 +10,18 @@
 // Constructors
 
 Vysyx_22051145_top::Vysyx_22051145_top(VerilatedContext* _vcontextp__, const char* _vcname__)
-    : vlSymsp{new Vysyx_22051145_top__Syms(_vcontextp__, _vcname__, this)}
+    : VerilatedModel{*_vcontextp__}
+    , vlSymsp{new Vysyx_22051145_top__Syms(contextp(), _vcname__, this)}
     , clk{vlSymsp->TOP.clk}
     , rst{vlSymsp->TOP.rst}
     , rootp{&(vlSymsp->TOP)}
 {
+    // Register model with the context
+    contextp()->addModel(this);
 }
 
 Vysyx_22051145_top::Vysyx_22051145_top(const char* _vcname__)
-    : Vysyx_22051145_top(nullptr, _vcname__)
+    : Vysyx_22051145_top(Verilated::threadContextp(), _vcname__)
 {
 }
 
@@ -30,43 +33,15 @@ Vysyx_22051145_top::~Vysyx_22051145_top() {
 }
 
 //============================================================
-// Evaluation loop
+// Evaluation function
 
-void Vysyx_22051145_top___024root___eval_initial(Vysyx_22051145_top___024root* vlSelf);
-void Vysyx_22051145_top___024root___eval_settle(Vysyx_22051145_top___024root* vlSelf);
-void Vysyx_22051145_top___024root___eval(Vysyx_22051145_top___024root* vlSelf);
-QData Vysyx_22051145_top___024root___change_request(Vysyx_22051145_top___024root* vlSelf);
 #ifdef VL_DEBUG
 void Vysyx_22051145_top___024root___eval_debug_assertions(Vysyx_22051145_top___024root* vlSelf);
 #endif  // VL_DEBUG
-void Vysyx_22051145_top___024root___final(Vysyx_22051145_top___024root* vlSelf);
-
-static void _eval_initial_loop(Vysyx_22051145_top__Syms* __restrict vlSymsp) {
-    vlSymsp->__Vm_didInit = true;
-    Vysyx_22051145_top___024root___eval_initial(&(vlSymsp->TOP));
-    // Evaluate till stable
-    int __VclockLoop = 0;
-    QData __Vchange = 1;
-    vlSymsp->__Vm_activity = true;
-    do {
-        VL_DEBUG_IF(VL_DBG_MSGF("+ Initial loop\n"););
-        Vysyx_22051145_top___024root___eval_settle(&(vlSymsp->TOP));
-        Vysyx_22051145_top___024root___eval(&(vlSymsp->TOP));
-        if (VL_UNLIKELY(++__VclockLoop > 100)) {
-            // About to fail, so enable debug to see what's not settling.
-            // Note you must run make with OPT=-DVL_DEBUG for debug prints.
-            int __Vsaved_debug = Verilated::debug();
-            Verilated::debug(1);
-            __Vchange = Vysyx_22051145_top___024root___change_request(&(vlSymsp->TOP));
-            Verilated::debug(__Vsaved_debug);
-            VL_FATAL_MT("/home/dmh/ysyx-workbench/npc/vsrc/top.v", 2, "",
-                "Verilated model didn't DC converge\n"
-                "- See https://verilator.org/warn/DIDNOTCONVERGE");
-        } else {
-            __Vchange = Vysyx_22051145_top___024root___change_request(&(vlSymsp->TOP));
-        }
-    } while (VL_UNLIKELY(__Vchange));
-}
+void Vysyx_22051145_top___024root___eval_static(Vysyx_22051145_top___024root* vlSelf);
+void Vysyx_22051145_top___024root___eval_initial(Vysyx_22051145_top___024root* vlSelf);
+void Vysyx_22051145_top___024root___eval_settle(Vysyx_22051145_top___024root* vlSelf);
+void Vysyx_22051145_top___024root___eval(Vysyx_22051145_top___024root* vlSelf);
 
 void Vysyx_22051145_top::eval_step() {
     VL_DEBUG_IF(VL_DBG_MSGF("+++++TOP Evaluate Vysyx_22051145_top::eval_step\n"); );
@@ -74,55 +49,66 @@ void Vysyx_22051145_top::eval_step() {
     // Debug assertions
     Vysyx_22051145_top___024root___eval_debug_assertions(&(vlSymsp->TOP));
 #endif  // VL_DEBUG
-    // Initialize
-    if (VL_UNLIKELY(!vlSymsp->__Vm_didInit)) _eval_initial_loop(vlSymsp);
-    // Evaluate till stable
-    int __VclockLoop = 0;
-    QData __Vchange = 1;
     vlSymsp->__Vm_activity = true;
-    do {
-        VL_DEBUG_IF(VL_DBG_MSGF("+ Clock loop\n"););
-        Vysyx_22051145_top___024root___eval(&(vlSymsp->TOP));
-        if (VL_UNLIKELY(++__VclockLoop > 100)) {
-            // About to fail, so enable debug to see what's not settling.
-            // Note you must run make with OPT=-DVL_DEBUG for debug prints.
-            int __Vsaved_debug = Verilated::debug();
-            Verilated::debug(1);
-            __Vchange = Vysyx_22051145_top___024root___change_request(&(vlSymsp->TOP));
-            Verilated::debug(__Vsaved_debug);
-            VL_FATAL_MT("/home/dmh/ysyx-workbench/npc/vsrc/top.v", 2, "",
-                "Verilated model didn't converge\n"
-                "- See https://verilator.org/warn/DIDNOTCONVERGE");
-        } else {
-            __Vchange = Vysyx_22051145_top___024root___change_request(&(vlSymsp->TOP));
-        }
-    } while (VL_UNLIKELY(__Vchange));
+    vlSymsp->__Vm_deleter.deleteAll();
+    if (VL_UNLIKELY(!vlSymsp->__Vm_didInit)) {
+        vlSymsp->__Vm_didInit = true;
+        VL_DEBUG_IF(VL_DBG_MSGF("+ Initial\n"););
+        Vysyx_22051145_top___024root___eval_static(&(vlSymsp->TOP));
+        Vysyx_22051145_top___024root___eval_initial(&(vlSymsp->TOP));
+        Vysyx_22051145_top___024root___eval_settle(&(vlSymsp->TOP));
+    }
+    // MTask 0 start
+    VL_DEBUG_IF(VL_DBG_MSGF("MTask0 starting\n"););
+    Verilated::mtaskId(0);
+    VL_DEBUG_IF(VL_DBG_MSGF("+ Eval\n"););
+    Vysyx_22051145_top___024root___eval(&(vlSymsp->TOP));
+    // Evaluate cleanup
+    Verilated::endOfThreadMTask(vlSymsp->__Vm_evalMsgQp);
+    Verilated::endOfEval(vlSymsp->__Vm_evalMsgQp);
 }
 
 //============================================================
-// Invoke final blocks
+// Events and timing
+bool Vysyx_22051145_top::eventsPending() { return false; }
 
-void Vysyx_22051145_top::final() {
-    Vysyx_22051145_top___024root___final(&(vlSymsp->TOP));
+uint64_t Vysyx_22051145_top::nextTimeSlot() {
+    VL_FATAL_MT(__FILE__, __LINE__, "", "%Error: No delays in the design");
+    return 0;
 }
 
 //============================================================
 // Utilities
-
-VerilatedContext* Vysyx_22051145_top::contextp() const {
-    return vlSymsp->_vm_contextp__;
-}
 
 const char* Vysyx_22051145_top::name() const {
     return vlSymsp->name();
 }
 
 //============================================================
+// Invoke final blocks
+
+void Vysyx_22051145_top___024root___eval_final(Vysyx_22051145_top___024root* vlSelf);
+
+VL_ATTR_COLD void Vysyx_22051145_top::final() {
+    Vysyx_22051145_top___024root___eval_final(&(vlSymsp->TOP));
+}
+
+//============================================================
+// Implementations of abstract methods from VerilatedModel
+
+const char* Vysyx_22051145_top::hierName() const { return vlSymsp->name(); }
+const char* Vysyx_22051145_top::modelName() const { return "Vysyx_22051145_top"; }
+unsigned Vysyx_22051145_top::threads() const { return 1; }
+std::unique_ptr<VerilatedTraceConfig> Vysyx_22051145_top::traceConfig() const {
+    return std::unique_ptr<VerilatedTraceConfig>{new VerilatedTraceConfig{false, false, false}};
+};
+
+//============================================================
 // Trace configuration
 
-void Vysyx_22051145_top___024root__traceInitTop(Vysyx_22051145_top___024root* vlSelf, VerilatedVcd* tracep);
+void Vysyx_22051145_top___024root__trace_init_top(Vysyx_22051145_top___024root* vlSelf, VerilatedVcd* tracep);
 
-static void traceInit(void* voidSelf, VerilatedVcd* tracep, uint32_t code) {
+VL_ATTR_COLD static void trace_init(void* voidSelf, VerilatedVcd* tracep, uint32_t code) {
     // Callback from tracep->open()
     Vysyx_22051145_top___024root* const __restrict vlSelf VL_ATTR_UNUSED = static_cast<Vysyx_22051145_top___024root*>(voidSelf);
     Vysyx_22051145_top__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
@@ -131,15 +117,21 @@ static void traceInit(void* voidSelf, VerilatedVcd* tracep, uint32_t code) {
             "Turning on wave traces requires Verilated::traceEverOn(true) call before time 0.");
     }
     vlSymsp->__Vm_baseCode = code;
-    tracep->module(vlSymsp->name());
     tracep->scopeEscape(' ');
-    Vysyx_22051145_top___024root__traceInitTop(vlSelf, tracep);
+    tracep->pushNamePrefix(std::string{vlSymsp->name()} + ' ');
+    Vysyx_22051145_top___024root__trace_init_top(vlSelf, tracep);
+    tracep->popNamePrefix();
     tracep->scopeEscape('.');
 }
 
-void Vysyx_22051145_top___024root__traceRegister(Vysyx_22051145_top___024root* vlSelf, VerilatedVcd* tracep);
+VL_ATTR_COLD void Vysyx_22051145_top___024root__trace_register(Vysyx_22051145_top___024root* vlSelf, VerilatedVcd* tracep);
 
-void Vysyx_22051145_top::trace(VerilatedVcdC* tfp, int, int) {
-    tfp->spTrace()->addInitCb(&traceInit, &(vlSymsp->TOP));
-    Vysyx_22051145_top___024root__traceRegister(&(vlSymsp->TOP), tfp->spTrace());
+VL_ATTR_COLD void Vysyx_22051145_top::trace(VerilatedVcdC* tfp, int levels, int options) {
+    if (tfp->isOpen()) {
+        vl_fatal(__FILE__, __LINE__, __FILE__,"'Vysyx_22051145_top::trace()' shall not be called after 'VerilatedVcdC::open()'.");
+    }
+    if (false && levels && options) {}  // Prevent unused
+    tfp->spTrace()->addModel(this);
+    tfp->spTrace()->addInitCb(&trace_init, &(vlSymsp->TOP));
+    Vysyx_22051145_top___024root__trace_register(&(vlSymsp->TOP), tfp->spTrace());
 }

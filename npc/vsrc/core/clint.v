@@ -98,7 +98,6 @@ module clint (
   wire _trap_ecall = trap_bus_i[`TRAP_ECALL];
   wire _trap_ebreak = trap_bus_i[`TRAP_EBREAK];
   wire _trap_mret = trap_bus_i[`TRAP_MRET];
-  wire _trap_ebreak = trap_bus_i[`TRAP_EBREAK];
   wire _trap_valid = (_trap_ecall | _trap_ebreak | _trap_mret);
 
   /* set the csr register and new pc if traps happened */

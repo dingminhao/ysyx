@@ -7,7 +7,7 @@
 #ifndef VERILATED_VYSYX_22051145_TOP__SYMS_H_
 #define VERILATED_VYSYX_22051145_TOP__SYMS_H_  // guard
 
-#include "verilated_heavy.h"
+#include "verilated.h"
 
 // INCLUDE MODEL CLASS
 
@@ -19,12 +19,13 @@
 // DPI TYPES for DPI Export callbacks (Internal use)
 
 // SYMS CLASS (contains all model state)
-class Vysyx_22051145_top__Syms final : public VerilatedSyms {
+class alignas(VL_CACHE_LINE_BYTES)Vysyx_22051145_top__Syms final : public VerilatedSyms {
   public:
     // INTERNAL STATE
     Vysyx_22051145_top* const __Vm_modelp;
     bool __Vm_activity = false;  ///< Used by trace routines to determine change occurred
     uint32_t __Vm_baseCode = 0;  ///< Used by trace routines when tracing multiple models
+    VlDeleter __Vm_deleter;
     bool __Vm_didInit = false;
 
     // MODULE INSTANCE STATE
@@ -36,6 +37,6 @@ class Vysyx_22051145_top__Syms final : public VerilatedSyms {
 
     // METHODS
     const char* name() { return TOP.name(); }
-} VL_ATTR_ALIGNED(VL_CACHE_LINE_BYTES);
+};
 
 #endif  // guard
